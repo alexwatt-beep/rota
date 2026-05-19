@@ -68,11 +68,10 @@
             width: 70px; height: 70px; background: var(--slate); border-radius: 18px;
             margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
             color: white; font-size: 32px; font-weight: bold;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
         input { 
             width: 100%; padding: 16px; border: 1.5px solid #eee; border-radius: 14px; 
-            font-size: 16px; margin-bottom: 12px; outline: none; transition: border-color 0.2s;
+            font-size: 16px; margin-bottom: 12px; outline: none; background: white;
         }
 
         /* Nav Glassmorphism */
@@ -114,8 +113,7 @@
 
         /* UI */
         .content { padding: 15px; }
-        .card { background: var(--ios-card); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.1s; }
-        .card:active { transform: scale(0.99); }
+        .card { background: var(--ios-card); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .btn-large { width: 100%; padding: 18px; background: var(--ios-blue); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-sm { padding: 8px 12px; font-size: 12px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; }
 
@@ -128,12 +126,9 @@
         .day-label { color: var(--slate-light); font-weight: 600; font-size: 14px; text-transform: uppercase; }
         .shift-badge { background: var(--ios-bg); padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 13px; min-width: 95px; text-align: center; }
 
-        /* Avatar Picker Styles */
+        /* Avatar Picker */
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
-        .avatar-option { 
-            padding: 10px; background: var(--ios-bg); border-radius: 12px; text-align: center; font-size: 24px; 
-            cursor: pointer; border: 2px solid transparent; transition: all 0.2s;
-        }
+        .avatar-option { padding: 10px; background: var(--ios-bg); border-radius: 12px; text-align: center; font-size: 24px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
         .avatar-option.selected { border-color: var(--ios-blue); background: var(--ios-card); transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
         /* Month Grid */
@@ -141,7 +136,7 @@
         .cal-head { background: #f8f8f8; padding: 10px 0; text-align: center; font-size: 10px; font-weight: 800; color: var(--ios-gray); text-transform: uppercase; }
         .cal-day { background: #fff; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 6px 2px; font-size: 13px; font-weight: 700; position: relative; }
         .cal-day.empty { background: #f9f9fb; }
-        .cal-day.active { border: 2px solid var(--ios-blue); z-index: 2; }
+        .cal-day.active { background: var(--ios-blue); color: white; z-index: 2; }
         .cal-day.is-bh { background: #fff5f5; }
         .bh-dot { position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; background: var(--danger); border-radius: 50%; }
         .cal-day.day-closed { background-image: repeating-linear-gradient(45deg, #f2f2f7, #f2f2f7 5px, #ffffff 5px, #ffffff 10px); color: #ccc; }
@@ -190,10 +185,7 @@
 
 <header id="header" class="hidden">
     <h1 id="view-title">Weekly Rota</h1>
-    <div class="sync-indicator">
-        <div class="pulse-dot"></div>
-        Cloud Sync
-    </div>
+    <div class="sync-indicator"><div class="pulse-dot"></div>Cloud Sync</div>
 </header>
 
 <div id="app" class="content hidden">
@@ -205,7 +197,7 @@
         </button>
         <div class="card">
             <label style="font-size:10px; color:var(--ios-gray); font-weight: 800; text-transform: uppercase;">Planning Week</label>
-            <select id="week-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; outline:none; color:var(--ios-blue);" onchange="changeWeek(this.value)"></select>
+            <select id="week-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; outline:none; color:var(--ios-blue);"></select>
         </div>
         <div id="weekly-container"></div>
     </section>
@@ -217,7 +209,7 @@
             Monthly Screenshot
         </button>
         <div class="card">
-            <select id="month-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; color:var(--ios-blue); outline:none;" onchange="renderMonth()"></select>
+            <select id="month-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; color:var(--ios-blue); outline:none;"></select>
         </div>
         <div class="cal-grid" id="cal-grid-body"></div>
         <div id="day-detail" class="day-detail-box">
@@ -227,11 +219,11 @@
 
     <!-- Settings -->
     <section id="tab-settings" class="hidden">
-        <div class="card">
-            <h3>Team Management</h3>
-            <div id="staff-manage-list"></div>
+        <div class="card" id="staff-form-card">
+            <h3 id="staff-form-title">Team Management</h3>
+            <div id="staff-manage-list" style="margin-bottom: 15px;"></div>
             
-            <div style="margin-top: 15px;">
+            <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
                 <label style="font-size: 11px; font-weight: 800; color: var(--slate-light);">CHOOSE AVATAR</label>
                 <div class="avatar-grid" id="avatar-picker"></div>
                 <div style="display:flex; gap:10px;">
@@ -239,7 +231,8 @@
                     <input type="text" id="new-staff-init" placeholder="Init" maxlength="2" style="width:70px">
                 </div>
             </div>
-            <button class="btn-large" style="margin-top:5px" onclick="addStaff()">Add New Member</button>
+            <button class="btn-large" id="add-staff-btn" onclick="addStaff()">Add New Member</button>
+            <button class="btn-large hidden" id="cancel-staff-btn" style="background:var(--slate-light)" onclick="cancelStaffEdit()">Cancel Edit</button>
         </div>
 
         <div class="card">
@@ -265,23 +258,12 @@
 
 <!-- Navigation -->
 <nav id="nav" class="bottom-nav hidden">
-    <div class="nav-item active" onclick="switchTab('weekly', this)">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-        <span>Weekly</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('monthly', this)">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-        <span>Monthly</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('settings', this)">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-        <span>Settings</span>
-    </div>
+    <div class="nav-item active" onclick="switchTab('weekly', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Weekly</span></div>
+    <div class="nav-item" onclick="switchTab('monthly', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg><span>Monthly</span></div>
+    <div class="nav-item" onclick="switchTab('settings', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span>Settings</span></div>
 </nav>
 
-<div id="picker-overlay" onclick="closePicker()">
-    <div class="picker-sheet" id="picker-btns" onclick="event.stopPropagation()"></div>
-</div>
+<div id="picker-overlay" onclick="closePicker()"><div class="picker-sheet" id="picker-btns" onclick="event.stopPropagation()"></div></div>
 
 <script type="module">
     import { initializeApp } from "firebase/app";
@@ -307,13 +289,13 @@
 
     const AVATARS = ["🦉", "🦜", "🦢", "🕊️", "🐧", "🐦", "🐤", "🦆", "🌸", "🌺", "🌻", "🌼", "🌷", "🌹", "🌵", "🌿"];
     let selectedAvatar = "🦉";
+    let editingStaffId = null;
 
     const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const BH = ['2026-08-31','2026-12-25','2026-12-28','2027-01-01','2027-03-26','2027-03-29','2027-05-03','2027-05-31','2027-08-30','2027-12-27','2027-12-28'];
     let currentWeekKey = "";
     let activeEdit = { sId: null, dIdx: null };
 
-    // --- Date Logic ---
     function getMonKey(d) {
         const date = new Date(d);
         date.setHours(12, 0, 0, 0); 
@@ -322,7 +304,6 @@
         return new Date(date.setDate(diff)).toISOString().split('T')[0];
     }
 
-    // --- Authentication ---
     window.doLogin = () => {
         if(document.getElementById('user-in').value === 'creative' && document.getElementById('pass-in').value === 'uncreative') {
             localStorage.setItem('rota_v10_auth', 'true');
@@ -334,17 +315,10 @@
         if(localStorage.getItem('rota_v10_auth') !== 'true') return;
         document.getElementById('login-screen').classList.add('hidden');
         ['header','app','nav'].forEach(id => document.getElementById(id).classList.remove('hidden'));
-        
         setupSelectors();
         renderAvatarPicker();
-
         onSnapshot(doc(db, "rotaData", "global"), (s) => {
-            if(s.exists()){ 
-                state = s.data(); 
-                renderWeekly(); 
-                if(window.currentTab==='monthly') renderMonth(); 
-                if(window.currentTab==='settings') renderSettings(); 
-            }
+            if(s.exists()){ state = s.data(); renderWeekly(); if(window.currentTab==='monthly') renderMonth(); if(window.currentTab==='settings') renderSettings(); }
         });
     }
 
@@ -360,6 +334,7 @@
         }
         currentWeekKey = getMonKey(new Date());
         wS.value = currentWeekKey;
+        wS.onchange = (e) => { currentWeekKey = e.target.value; renderWeekly(); };
 
         const mS = document.getElementById('month-sel');
         for(let i=-2; i<18; i++){
@@ -367,9 +342,10 @@
             mS.add(new Option(d.toLocaleDateString('en-GB',{month:'long',year:'numeric'}), `${d.getFullYear()}-${d.getMonth()}`));
         }
         mS.value = `${new Date().getFullYear()}-${new Date().getMonth()}`;
+        // FIX 1: Explicitly trigger renderMonth on dropdown change
+        mS.onchange = () => renderMonth();
     }
 
-    // --- Navigation ---
     window.switchTab = (t, el) => {
         window.currentTab = t;
         document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
@@ -380,7 +356,6 @@
         if(t==='monthly') renderMonth(); else if(t==='settings') renderSettings(); else renderWeekly();
     };
 
-    // --- Weekly ---
     function renderWeekly() {
         const cont = document.getElementById('weekly-container');
         cont.innerHTML = "";
@@ -400,38 +375,31 @@
                 total += c.hrs || 0;
                 rows += `<div class="day-row" onclick="openPicker(${s.id},${i})"><span class="day-label">${DAYS[i]}</span><div class="shift-badge">${c.label}</div></div>`;
             });
-            cont.innerHTML += `<div class="card"><div class="staff-header">
-                <div class="staff-info"><div class="staff-avatar-circle">${s.avatar || '👤'}</div><span>${s.name}</span></div>
-                <span class="staff-total-badge">${total.toFixed(1)}h</span></div>${rows}</div>`;
+            cont.innerHTML += `<div class="card"><div class="staff-header"><div class="staff-info"><div class="staff-avatar-circle">${s.avatar || '👤'}</div><span>${s.name}</span></div><span class="staff-total-badge">${total.toFixed(1)}h</span></div>${rows}</div>`;
         });
     }
 
-    // --- Month View ---
-    function renderMonth() {
+    window.renderMonth = () => {
         const [y, m] = document.getElementById('month-sel').value.split('-').map(Number);
         const grid = document.getElementById('cal-grid-body');
         grid.innerHTML = DAYS.map(d => `<div class="cal-head">${d}</div>`).join('');
-
         const first = new Date(y, m, 1);
         const last = new Date(y, m + 1, 0).getDate();
         let startPad = first.getDay() - 1; if(startPad === -1) startPad = 6;
-
         for(let i=0; i<startPad; i++) grid.innerHTML += `<div class="cal-day empty"></div>`;
-
         for(let d=1; d<=last; d++){
             const date = new Date(y, m, d);
             const iso = date.toISOString().split('T')[0];
             const wk = getMonKey(date);
             const dIdx = (date.getDay() + 6) % 7;
-            const isBankHoliday = BH.includes(iso);
-            let isClosedDay = false;
-            
+            const isBH = BH.includes(iso);
+            let isClosed = false;
             let badges = [];
             if(state.rota[wk]) {
                 state.staff.forEach(s => {
                     const cId = (state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
                     const c = state.codes.find(x=>x.id===cId);
-                    if (c && c.label.toUpperCase() === 'CLOSED') isClosedDay = true;
+                    if (c && c.label.toUpperCase() === 'CLOSED') isClosed = true;
                     if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') {
                         const isHol = c.label.toLowerCase().startsWith('hol');
                         const isAway = c.label.toLowerCase().startsWith('away');
@@ -439,10 +407,7 @@
                     }
                 });
             }
-            grid.innerHTML += `<div class="cal-day ${isBankHoliday?'is-bh':''} ${isClosedDay?'day-closed':''}" onclick="showDayDetails(${y},${m},${d}, this)">
-                                ${d}${isBankHoliday?'<div class="bh-dot"></div>':''}
-                                <div class="initials-container">${badges.join('')}</div>
-                               </div>`;
+            grid.innerHTML += `<div class="cal-day ${isBH?'is-bh':''} ${isClosed?'day-closed':''}" onclick="showDayDetails(${y},${m},${d}, this)">${d}${isBH?'<div class="bh-dot"></div>':''}<div class="initials-container">${badges.join('')}</div></div>`;
         }
     }
 
@@ -456,61 +421,74 @@
         state.staff.forEach(s => {
             const cId = (state.rota[wk] && state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
             const c = state.codes.find(x=>x.id===cId);
-            if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') 
-                staff.push(`${s.avatar || '👤'} <b>${s.name}:</b> ${c.label}`);
+            if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') staff.push(`${s.avatar} <b>${s.name}:</b> ${c.label}`);
         });
-        document.getElementById('day-detail').innerHTML = `<b>${d} ${new Date(y,m).toLocaleString('en-GB',{month:'short'})}:</b><br>${staff.length ? staff.join('<br>') : 'No staff working'}`;
+        document.getElementById('day-detail').innerHTML = `<b>${d} ${new Date(y,m).toLocaleString('en-GB',{month:'short'})}:</b><br>${staff.length ? staff.join('<br>') : 'Shop is closed or no staff set'}`;
     };
 
-    // --- Avatar Logic ---
+    // FIX 2: Better Avatar Picking flow for Add and Edit
     function renderAvatarPicker() {
         const picker = document.getElementById('avatar-picker');
-        picker.innerHTML = AVATARS.map(a => `<div class="avatar-option ${a === selectedAvatar ? 'selected' : ''}" onclick="selectAvatar('${a}', this)">${a}</div>`).join('');
+        picker.innerHTML = AVATARS.map(a => `<div class="avatar-option ${a === selectedAvatar ? 'selected' : ''}" id="av-${a}" onclick="selectAvatar('${a}')">${a}</div>`).join('');
     }
-    window.selectAvatar = (a, el) => {
+    window.selectAvatar = (a) => {
         selectedAvatar = a;
         document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
-        el.classList.add('selected');
+        document.getElementById('av-'+a).classList.add('selected');
     }
 
-    // --- Settings & Management ---
     function renderSettings() {
         const sList = document.getElementById('staff-manage-list');
         sList.innerHTML = "";
         state.staff.forEach(s => {
-            sList.innerHTML += `<div class="day-row">
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <div class="staff-avatar-circle" style="width:24px; height:24px; font-size:14px;">${s.avatar || '👤'}</div>
-                    <span><b>${s.name}</b> (${s.initials})</span>
-                </div>
-                <div><button class="btn-sm" style="background:var(--ios-blue); color:white" onclick="editStaff(${s.id})">Edit</button>
-                <button class="btn-sm" style="background:var(--danger); color:white" onclick="removeStaff(${s.id})">Del</button></div></div>`;
+            sList.innerHTML += `<div class="day-row"><div style="display:flex; align-items:center; gap:8px;"><div class="staff-avatar-circle" style="width:24px; height:24px; font-size:14px;">${s.avatar || '👤'}</div><span><b>${s.name}</b> (${s.initials})</span></div><div><button class="btn-sm" style="background:var(--ios-blue); color:white" onclick="editStaff(${s.id})">Edit</button><button class="btn-sm" style="background:var(--danger); color:white" onclick="removeStaff(${s.id})">Del</button></div></div>`;
         });
         const cList = document.getElementById('codes-manage-list');
         cList.innerHTML = "";
         state.codes.forEach(c => {
             if(c.id === 'off') return;
-            cList.innerHTML += `<div class="day-row"><span><b>${c.label}</b> (${c.hrs}h)</span>
-                <div><button class="btn-sm" style="background:var(--ios-blue); color:white" onclick="editCode('${c.id}')">Edit</button>
-                <button class="btn-sm" style="background:var(--danger); color:white" onclick="removeCode('${c.id}')">Del</button></div></div>`;
+            cList.innerHTML += `<div class="day-row"><span><b>${c.label}</b> (${c.hrs}h)</span><div><button class="btn-sm" style="background:var(--ios-blue); color:white" onclick="editCode('${c.id}')">Edit</button><button class="btn-sm" style="background:var(--danger); color:white" onclick="removeCode('${c.id}')">Del</button></div></div>`;
         });
     }
 
+    // UPDATED: Logic to handle both Add and Edit
     window.addStaff = async () => {
         const n = document.getElementById('new-staff-name').value;
         const i = document.getElementById('new-staff-init').value;
-        if(!n || !i) return;
-        state.staff.push({id: Date.now(), name: n, initials: i.toUpperCase(), avatar: selectedAvatar});
+        if(!n || !i) return alert("Missing name or initials");
+        
+        if (editingStaffId) {
+            const index = state.staff.findIndex(x => x.id === editingStaffId);
+            state.staff[index].name = n;
+            state.staff[index].initials = i.toUpperCase();
+            state.staff[index].avatar = selectedAvatar;
+            cancelStaffEdit();
+        } else {
+            state.staff.push({id: Date.now(), name: n, initials: i.toUpperCase(), avatar: selectedAvatar});
+        }
         document.getElementById('new-staff-name').value = ""; document.getElementById('new-staff-init').value = "";
         await sync();
     };
 
-    window.editStaff = async (id) => {
+    window.editStaff = (id) => {
         const s = state.staff.find(x => x.id === id);
-        const nName = prompt("Update Name:", s.name); 
-        const nInit = prompt("Update Initials:", s.initials);
-        const nAvatar = prompt("Paste New Avatar Emoji (or leave as is):", s.avatar);
-        if(nName && nInit) { s.name = nName; s.initials = nInit.toUpperCase().substring(0,2); s.avatar = nAvatar || s.avatar; await sync(); }
+        editingStaffId = id;
+        document.getElementById('new-staff-name').value = s.name;
+        document.getElementById('new-staff-init').value = s.initials;
+        selectAvatar(s.avatar || "🦉");
+        document.getElementById('add-staff-btn').innerText = "Update Staff Member";
+        document.getElementById('cancel-staff-btn').classList.remove('hidden');
+        document.getElementById('staff-form-title').innerText = "Edit Staff Member";
+        document.getElementById('staff-form-card').scrollIntoView({behavior: 'smooth'});
+    };
+
+    window.cancelStaffEdit = () => {
+        editingStaffId = null;
+        document.getElementById('new-staff-name').value = "";
+        document.getElementById('new-staff-init').value = "";
+        document.getElementById('add-staff-btn').innerText = "Add New Member";
+        document.getElementById('cancel-staff-btn').classList.add('hidden');
+        document.getElementById('staff-form-title').innerText = "Team Management";
     };
 
     window.addCode = async () => {
@@ -531,7 +509,6 @@
     window.removeStaff = async (id) => { if(confirm('Delete staff?')) { state.staff = state.staff.filter(x => x.id !== id); await sync(); } };
     window.removeCode = async (id) => { if(confirm('Delete code?')) { state.codes = state.codes.filter(x => x.id !== id); await sync(); } };
 
-    // --- Utils & UI ---
     window.openPicker = (sId, dIdx) => {
         activeEdit = {sId, dIdx};
         const cont = document.getElementById('picker-btns');
@@ -545,7 +522,6 @@
         state.rota[currentWeekKey][activeEdit.sId][activeEdit.dIdx] = cId;
         closePicker(); renderWeekly(); await sync();
     };
-    window.changeWeek = (v) => { currentWeekKey = v; renderWeekly(); };
     window.logout = () => { localStorage.removeItem('rota_v10_auth'); location.reload(); };
 
     window.exportData = () => {
@@ -580,18 +556,12 @@
             const [y, m] = document.getElementById('month-sel').value.split('-').map(Number);
             let h = branding + `<h3>${new Date(y,m).toLocaleString('en-GB',{month:'long',year:'numeric'})}</h3><table class="ss-table"><tr><th>Date</th><th>Staff Working</th></tr>`;
             for(let d=1; d<=new Date(y,m+1,0).getDate(); d++){
-                const dt = new Date(y,m,d);
-                const wk = getMonKey(dt);
-                const dIdx = (dt.getDay()+6)%7;
-                let wrks = [];
+                const dt = new Date(y,m,d); const wk = getMonKey(dt); const dIdx = (dt.getDay()+6)%7; let wrks = [];
                 if(state.rota[wk]) {
                     state.staff.forEach(s => {
                         const cId = state.rota[wk][s.id] ? state.rota[wk][s.id][dIdx] : 'off';
                         const c = state.codes.find(x=>x.id===cId);
-                        const isOff = c && (c.id === 'off' || c.label.toUpperCase() === 'OFF');
-                        const isClosed = c && c.label.toUpperCase() === 'CLOSED';
-                        const isAway = c && c.label.toLowerCase().startsWith('away');
-                        if(c && !isOff && !isClosed && !isAway) {
+                        if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED' && !c.label.toLowerCase().startsWith('away')) {
                             const suffix = c.label.toLowerCase().startsWith('hol') ? " (HOL)" : "";
                             wrks.push(`${s.avatar} ${s.name}${suffix}`);
                         }

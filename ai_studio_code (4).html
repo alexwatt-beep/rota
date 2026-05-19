@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Retail Rota Pro</title>
+    <style>
+        :root {
+            --ios-blue: #007aff;
+            --ios-bg: #f2f2f7;
+            --ios-card: #ffffff;
+            --ios-text: #000000;
+            --ios-gray: #8e8e93;
+            --ios-border: #c6c6c8;
+            --danger: #ff3b30;
+            --success: #34c759;
+            --nav-height: 75px;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, system-ui, sans-serif; }
+
+        body { background: var(--ios-bg); color: var(--ios-text); margin: 0; padding-bottom: var(--nav-height); }
+
+        /* --- AUTH --- */
+        #login-screen { position: fixed; inset: 0; background: var(--ios-bg); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-card { background: var(--ios-card); width: 100%; max-width: 350px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+        input { width: 100%; padding: 15px; border: 1px solid var(--ios-border); border-radius: 12px; font-size: 16px; margin-bottom: 12px; outline: none; }
+
+        /* --- UI COMPONENTS --- */
+        header { background: var(--ios-card); padding: 50px 20px 15px; border-bottom: 0.5px solid var(--ios-border); position: sticky; top: 0; z-index: 100; }
+        h1 { margin: 0; font-size: 24px; font-weight: 700; }
+        .content { padding: 15px; }
+        .card { background: var(--ios-card); border-radius: 14px; padding: 16px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .btn-large { width: 100%; padding: 16px; background: var(--ios-blue); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+        .btn-large:active { opacity: 0.7; }
+
+        /* --- WEEKLY CARDS --- */
+        .staff-header { display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--ios-bg); margin-bottom: 10px; }
+        .day-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--ios-bg); }
+        .day-row:last-child { border-bottom: none; }
+        .shift-box { background: var(--ios-bg); padding: 8px 12px; border-radius: 8px; font-weight: 600; min-width: 90px; text-align: center; font-size: 14px; }
+
+        /* --- NAVIGATION --- */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: var(--nav-height); background: rgba(255,255,255,0.9); backdrop-filter: blur(15px); border-top: 0.5px solid var(--ios-border); display: flex; justify-content: space-around; padding-top: 10px; z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--ios-gray); font-size: 11px; text-decoration: none; flex: 1; }
+        .nav-item.active { color: var(--ios-blue); }
+        .nav-icon { font-size: 22px; margin-bottom: 4px; }
+
+        /* --- SCREENSHOT --- */
+        #ss-overlay { position: fixed; inset: 0; background: white; z-index: 9000; display: none; overflow-y: auto; padding: 20px; }
+        .ss-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .ss-table th, .ss-table td { border: 1px solid #000; padding: 5px; text-align: center; }
+        .ss-close { position: fixed; top: 15px; right: 15px; background: #000; color: #fff; padding: 8px 15px; border-radius: 20px; font-size: 12px; }
+
+        /* --- PICKER --- */
+        #picker-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 8000; display: none; flex-direction: column; justify-content: flex-end; }
+        .picker-sheet { background: var(--ios-bg); border-radius: 20px 20px 0 0; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        /* --- MONTH VIEW --- */
+        .m-day { display: flex; background: white; padding: 10px; border-radius: 10px; margin-bottom: 5px; align-items: center; }
+        .m-date { width: 40px; font-weight: bold; text-align: center; border-right: 1px solid var(--ios-bg); margin-right: 10px; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="login-screen">
+    <div class="login-card">
+        <h1>Retail Login</h1>
+        <input type="text" id="user-in" placeholder="Username (creative)">
+        <input type="password" id="pass-in" placeholder="Password (uncreative)">
+        <button class="btn-large" onclick="doLogin()">Sign In</button>
+        <p id="err" class="hidden" style="color:red">Access Denied</p>
+    </div>
+</div>
+
+<!-- Header -->
+<header id="header" class="hidden">
+    <h1 id="title">Weekly Rota</h1>
+</header>
+
+<!-- Main App -->
+<div id="app" class="content hidden">
+    
+    <!-- WEEKLY TAB -->
+    <section id="tab-weekly">
+        <button class="btn-large" style="background:#34c759" onclick="openSS('week')">📸 Weekly Screenshot</button>
+        <div class="card">
+            <label style="font-size:11px; color:gray">SELECT WEEK COMMENCING</label>
+            <select id="week-sel" style="width:100%; border:none; font-size:18px; font-weight:bold; padding:10px 0;" onchange="setWeek(this.value)"></select>
+        </div>
+        <div id="week-container"></div>
+    </section>
+
+    <!-- MONTH TAB -->
+    <section id="tab-monthly" class="hidden">
+        <button class="btn-large" style="background:#34c759" onclick="openSS('month')">📸 Monthly Screenshot</button>
+        <div class="card">
+            <select id="month-sel" style="width:100%; border:none; font-size:18px; font-weight:bold" onchange="renderMonth()"></select>
+        </div>
+        <div id="month-container"></div>
+    </section>
+
+    <!-- STAFF TAB -->
+    <section id="tab-staff" class="hidden">
+        <div class="card">
+            <input type="text" id="staff-name" placeholder="Staff Name">
+            <button class="btn-large" onclick="addStaff()">Add Staff Member</button>
+        </div>
+        <div id="staff-list"></div>
+    </section>
+
+    <!-- SETTINGS TAB -->
+    <section id="tab-settings" class="hidden">
+        <div class="card">
+            <h3>Shift Codes</h3>
+            <div id="codes-list"></div>
+            <input type="text" id="code-label" placeholder="Code (e.g. 9-5)">
+            <input type="number" id="code-hrs" placeholder="Hours (e.g. 8)">
+            <button class="btn-large" style="background:gray" onclick="addCode()">Add Code</button>
+        </div>
+        <button class="btn-large" style="background:var(--success)" onclick="exportJSON()">Export JSON</button>
+        <button class="btn-large" style="background:var(--danger)" onclick="logout()">Logout</button>
+    </section>
+</div>
+
+<!-- Screenshot Overlay -->
+<div id="ss-overlay">
+    <button class="ss-close" onclick="closeSS()">Close</button>
+    <div id="ss-body"></div>
+</div>
+
+<!-- Picker Sheet -->
+<div id="picker-overlay" onclick="this.style.display='none'">
+    <div class="picker-sheet" onclick="event.stopPropagation()">
+        <div id="picker-options" style="grid-column:span 2; display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
+        <button class="btn-large" style="grid-column:span 2; background:gray; margin-top:10px" onclick="document.getElementById('picker-overlay').style.display='none'">Cancel</button>
+    </div>
+</div>
+
+<!-- Nav -->
+<nav id="nav" class="bottom-nav hidden">
+    <a href="javascript:void(0)" class="nav-item active" onclick="tab('weekly')"><span class="nav-icon">📅</span><span>Weekly</span></a>
+    <a href="javascript:void(0)" class="nav-item" onclick="tab('monthly')"><span class="nav-icon">🗓️</span><span>Month</span></a>
+    <a href="javascript:void(0)" class="nav-item" onclick="tab('staff')"><span class="nav-icon">👥</span><span>Staff</span></a>
+    <a href="javascript:void(0)" class="nav-item" onclick="tab('settings')"><span class="nav-icon">⚙️</span><span>Settings</span></a>
+</nav>
+
+<script>
+    let state = {
+        staff: [{id: 1, name: "Sandra"}, {id: 2, name: "Ali"}, {id: 3, name: "Catherine"}, {id: 4, name: "Sue"}],
+        codes: [{id: 'none', label: 'OFF', hrs: 0}, {id: 's1', label: '9-5.30', hrs: 8.5}, {id: 's2', label: '9-1', hrs: 4}, {id: 'hol', label: 'HOL', hrs: 0}],
+        rota: {}, // Keyed by Week-Commencing-Date
+        currWeek: ""
+    };
+
+    const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    function doLogin() {
+        if(document.getElementById('user-in').value === 'creative' && document.getElementById('pass-in').value === 'uncreative') {
+            localStorage.setItem('rota_auth', 'true');
+            init();
+        } else {
+            document.getElementById('err').classList.remove('hidden');
+        }
+    }
+
+    function init() {
+        if(localStorage.getItem('rota_auth') !== 'true') return;
+        
+        document.getElementById('login-screen').classList.add('hidden');
+        ['header','app','nav'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+
+        const saved = localStorage.getItem('rota_store_v4');
+        if(saved) state = JSON.parse(saved);
+
+        genWeeks();
+        genMonths();
+
+        if(!state.currWeek) {
+            const d = new Date();
+            const mon = new Date(d.setDate(d.getDate() - d.getDay() + (d.getDay() === 0 ? -6 : 1)));
+            state.currWeek = mon.toISOString().split('T')[0];
+        }
+        document.getElementById('week-sel').value = state.currWeek;
+        renderWeek();
+    }
+
+    function save() { localStorage.setItem('rota_store_v4', JSON.stringify(state)); }
+
+    function tab(t) {
+        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+        document.getElementById('tab-'+t).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        document.getElementById('title').innerText = t.charAt(0).toUpperCase() + t.slice(1);
+        if(t === 'weekly') renderWeek();
+        if(t === 'monthly') renderMonth();
+        if(t === 'staff') renderStaff();
+        if(t === 'settings') renderSettings();
+    }
+
+    // --- WEEKLY ENGINE ---
+    function genWeeks() {
+        const sel = document.getElementById('week-sel');
+        let d = new Date();
+        d.setDate(d.getDate() - 21); // Start 3 weeks ago
+        for(let i=0; i<52; i++) {
+            const mon = new Date(d.setDate(d.getDate() - d.getDay() + (d.getDay() === 0 ? -6 : 1)));
+            const iso = mon.toISOString().split('T')[0];
+            sel.add(new Option("Mon " + mon.toLocaleDateString('en-GB', {day:'2-digit', month:'short'}), iso));
+            d.setDate(mon.getDate() + 7);
+        }
+    }
+
+    function setWeek(v) {
+        state.currWeek = v;
+        save();
+        renderWeek();
+    }
+
+    function renderWeek() {
+        const cont = document.getElementById('week-container');
+        cont.innerHTML = "";
+        const wk = state.currWeek;
+
+        if(!state.rota[wk]) state.rota[wk] = {};
+
+        state.staff.forEach(s => {
+            // Ensure this staff member has data for THIS specific week
+            if(!state.rota[wk][s.id]) state.rota[wk][s.id] = Array(7).fill('none');
+            
+            let totalHrs = 0;
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            let html = `<div class="staff-header"><span>${s.name}</span><span id="total-${s.id}" style="color:var(--ios-blue)">0h</span></div>`;
+            
+            state.rota[wk][s.id].forEach((cId, idx) => {
+                const code = state.codes.find(c => c.id === cId) || state.codes[0];
+                totalHrs += code.hrs;
+                html += `
+                    <div class="day-row" onclick="openPicker(${s.id}, ${idx})">
+                        <span style="color:gray">${DAYS[idx]}</span>
+                        <div class="shift-box">${code.label}</div>
+                    </div>`;
+            });
+            
+            card.innerHTML = html;
+            cont.appendChild(card);
+            document.getElementById(`total-${s.id}`).innerText = totalHrs + "h";
+        });
+    }
+
+    let activeSlot = { sId: null, dIdx: null };
+    function openPicker(sId, dIdx) {
+        activeSlot = { sId, dIdx };
+        const opt = document.getElementById('picker-options');
+        opt.innerHTML = "";
+        state.codes.forEach(c => {
+            const b = document.createElement('button');
+            b.className = 'btn-large';
+            b.style.background = 'white'; b.style.color = 'black';
+            b.innerText = c.label;
+            b.onclick = () => {
+                state.rota[state.currWeek][activeSlot.sId][activeSlot.dIdx] = c.id;
+                save();
+                renderWeek();
+                document.getElementById('picker-overlay').style.display='none';
+            };
+            opt.appendChild(b);
+        });
+        document.getElementById('picker-overlay').style.display='flex';
+    }
+
+    // --- MONTH VIEW ---
+    function genMonths() {
+        const sel = document.getElementById('month-sel');
+        const now = new Date();
+        for(let i=-1; i<6; i++) {
+            const d = new Date(now.getFullYear(), now.getMonth()+i, 1);
+            sel.add(new Option(d.toLocaleDateString('en-GB', {month:'long', year:'numeric'}), d.getFullYear()+'-'+d.getMonth()));
+        }
+    }
+
+    function renderMonth() {
+        const [y, m] = document.getElementById('month-sel').value.split('-').map(Number);
+        const cont = document.getElementById('month-container');
+        cont.innerHTML = "";
+        const last = new Date(y, m+1, 0).getDate();
+
+        for(let d=1; d<=last; d++) {
+            const dt = new Date(y, m, d);
+            const dIdx = (dt.getDay() + 6) % 7;
+            const mon = new Date(dt); mon.setDate(dt.getDate() - dIdx);
+            const wkKey = mon.toISOString().split('T')[0];
+            
+            let staff = [];
+            state.staff.forEach(s => {
+                const cId = (state.rota[wkKey] && state.rota[wkKey][s.id]) ? state.rota[wkKey][s.id][dIdx] : 'none';
+                const c = state.codes.find(i => i.id === cId);
+                if(c && c.hrs > 0) staff.push(`${s.name} (${c.label})`);
+            });
+
+            const row = document.createElement('div');
+            row.className = 'm-day';
+            row.innerHTML = `<div class="m-date">${d}<br><small>${DAYS[dIdx]}</small></div><div style="font-size:13px">${staff.length ? staff.join(', ') : '---'}</div>`;
+            cont.appendChild(row);
+        }
+    }
+
+    // --- SCREENSHOT ---
+    function openSS(type) {
+        const body = document.getElementById('ss-body');
+        let html = "";
+        if(type === 'week') {
+            html = `<h2>Rota: ${state.currWeek}</h2><table class="ss-table"><tr><th>Staff</th>` + DAYS.map(d=>`<th>${d}</th>`).join('') + `<th>Total</th></tr>`;
+            state.staff.forEach(s => {
+                const row = state.rota[state.currWeek][s.id];
+                let t = 0;
+                html += `<tr><td><b>${s.name}</b></td>` + row.map(cId => {
+                    const c = state.codes.find(i=>i.id===cId); t+=c.hrs; return `<td>${c.label}</td>`;
+                }).join('') + `<td><b>${t}</b></td></tr>`;
+            });
+            html += `</table>`;
+        } else {
+            const [y, m] = document.getElementById('month-sel').value.split('-').map(Number);
+            html = `<h2>${new Date(y,m).toLocaleDateString('en-GB',{month:'long'})}</h2>`;
+            const last = new Date(y, m+1, 0).getDate();
+            for(let d=1; d<=last; d++) {
+                const dt = new Date(y, m, d);
+                const dIdx = (dt.getDay() + 6) % 7;
+                const mon = new Date(dt); mon.setDate(dt.getDate() - dIdx);
+                const wkKey = mon.toISOString().split('T')[0];
+                let staff = [];
+                state.staff.forEach(s => {
+                    const cId = (state.rota[wkKey] && state.rota[wkKey][s.id]) ? state.rota[wkKey][s.id][dIdx] : 'none';
+                    const c = state.codes.find(i => i.id === cId);
+                    if(c && c.hrs > 0) staff.push(`${s.name}(${c.label})`);
+                });
+                if(staff.length) html += `<div style="font-size:12px; border-bottom:1px solid #ccc; padding:4px"><b>${d} ${DAYS[dIdx]}:</b> ${staff.join(', ')}</div>`;
+            }
+        }
+        body.innerHTML = html;
+        document.getElementById('ss-overlay').style.display = 'block';
+    }
+    function closeSS() { document.getElementById('ss-overlay').style.display = 'none'; }
+
+    // --- MANAGE STAFF & CODES ---
+    function renderStaff() {
+        const cont = document.getElementById('staff-list');
+        cont.innerHTML = "";
+        state.staff.forEach(s => {
+            const d = document.createElement('div');
+            d.className = 'card'; d.style.display='flex'; d.style.justifyContent='space-between';
+            d.innerHTML = `<b>${s.name}</b><span onclick="delStaff(${s.id})" style="color:red">Delete</span>`;
+            cont.appendChild(d);
+        });
+    }
+    function addStaff() {
+        const n = document.getElementById('staff-name').value;
+        if(!n) return;
+        state.staff.push({id: Date.now(), name: n});
+        document.getElementById('staff-name').value = "";
+        save(); renderStaff();
+    }
+    function delStaff(id) { state.staff = state.staff.filter(s=>s.id!==id); save(); renderStaff(); }
+
+    function renderSettings() {
+        const cont = document.getElementById('codes-list');
+        cont.innerHTML = "";
+        state.codes.forEach(c => {
+            if(c.id === 'none') return;
+            const d = document.createElement('div');
+            d.className = 'day-row';
+            d.innerHTML = `<span>${c.label} (${c.hrs}h)</span><span onclick="delCode('${c.id}')" style="color:red">✕</span>`;
+            cont.appendChild(d);
+        });
+    }
+    function addCode() {
+        const l = document.getElementById('code-label').value;
+        const h = parseFloat(document.getElementById('code-hrs').value);
+        if(!l) return;
+        state.codes.push({id: 'c'+Date.now(), label: l, hrs: h || 0});
+        save(); renderSettings();
+    }
+    function delCode(id) { state.codes = state.codes.filter(c=>c.id!==id); save(); renderSettings(); }
+
+    function exportJSON() {
+        const blob = new Blob([JSON.stringify(state)], {type: "application/json"});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "rota_backup.json"; a.click();
+    }
+
+    function logout() { localStorage.removeItem('rota_auth'); location.reload(); }
+
+    init();
+</script>
+</body>
+</html>

@@ -55,23 +55,22 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- LOGIN --- */
+        /* --- CLEAN LOGIN WITH BACKGROUND IMAGE --- */
         #login-screen { 
-            position: fixed; inset: 0; background: linear-gradient(135deg, #f2f2f7 0%, #dcdde1 100%);
+            position: fixed; inset: 0; 
+            background: url('bg.jpg') no-repeat center center;
+            background-size: cover;
             z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; 
         }
         .login-card { 
-            background: var(--ios-card); width: 100%; max-width: 360px; padding: 40px 30px; 
-            border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); text-align: center; 
-        }
-        .login-logo {
-            width: 70px; height: 70px; background: var(--slate); border-radius: 50%;
-            margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 32px; font-weight: bold;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 0.95); 
+            width: 100%; max-width: 340px; padding: 30px; 
+            border-radius: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
+            text-align: center;
+            backdrop-filter: blur(10px);
         }
         input { 
-            width: 100%; padding: 16px; border: 1.5px solid #eee; border-radius: 14px; 
+            width: 100%; padding: 16px; border: 1.5px solid #ddd; border-radius: 14px; 
             font-size: 16px; margin-bottom: 12px; outline: none; background: white;
         }
 
@@ -127,7 +126,7 @@
         .day-label { color: var(--slate-light); font-weight: 600; font-size: 14px; text-transform: uppercase; }
         .shift-badge { background: var(--ios-bg); padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 13px; min-width: 95px; text-align: center; }
 
-        /* Avatar Picker (Scrollable Enhancement) */
+        /* Avatar Picker */
         .avatar-grid { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
@@ -138,10 +137,9 @@
             padding: 5px;
             background: var(--ios-bg);
             border-radius: 14px;
-            -webkit-overflow-scrolling: touch;
         }
-        .avatar-option { padding: 12px; background: white; border-radius: 12px; text-align: center; font-size: 24px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .avatar-option.selected { border-color: var(--ios-blue); transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .avatar-option { padding: 12px; background: white; border-radius: 12px; text-align: center; font-size: 24px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+        .avatar-option.selected { border-color: var(--ios-blue); transform: scale(1.05); }
 
         /* Month Grid */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #ddd; border: 1.5px solid var(--ios-border); border-radius: 16px; overflow: hidden; }
@@ -172,7 +170,7 @@
         /* Picker */
         #picker-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 8000; display: none; flex-direction: column; justify-content: flex-end; }
         .picker-sheet { background: var(--ios-bg); border-radius: 28px 28px 0 0; padding: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-height: 80vh; overflow-y: auto; padding-bottom: calc(30px + var(--safe-bottom)); }
-        .picker-btn { background: white; border: none; padding: 18px; border-radius: 16px; font-size: 15px; font-weight: 700; color: var(--slate); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .picker-btn { background: white; border: none; padding: 18px; border-radius: 16px; font-size: 15px; font-weight: 700; color: var(--slate); }
 
         .hidden { display: none !important; }
     </style>
@@ -181,11 +179,9 @@
 
 <div id="login-screen">
     <div class="login-card">
-        <div class="login-logo">🕒</div>
-        <h1 style="margin-bottom: 30px;">Creative Cove Portal</h1>
         <input type="text" id="user-in" placeholder="Username">
         <input type="password" id="pass-in" placeholder="Password">
-        <button class="btn-large" onclick="doLogin()">Login to Cloud</button>
+        <button class="btn-large" onclick="doLogin()">Login</button>
         <p id="l-err" class="hidden" style="color:var(--danger); font-size:14px; margin-top: 15px;">Access Denied</p>
     </div>
 </div>
@@ -268,7 +264,7 @@
     </section>
 </div>
 
-<!-- Navigation -->
+<!-- Navigation Bar -->
 <nav id="nav" class="bottom-nav hidden">
     <div class="nav-item active" onclick="switchTab('weekly', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Weekly</span></div>
     <div class="nav-item" onclick="switchTab('monthly', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg><span>Monthly</span></div>
@@ -299,11 +295,7 @@
         rota: {}
     };
 
-    // EXPANDED AVATAR LIST (Birds, Flowers, Nature)
-    const AVATARS = [
-        "👤", "🦉", "🦅", "🦜", "🦢", "🕊️", "🐧", "🐦", "🐤", "🦆", "🦩", "🦚", "🐓", "🐥", "🐦‍⬛", "🦅", "🐦‍🔥", 
-        "🌸", "🌺", "🌻", "🌼", "🌷", "🌹", "🪻", "🪷", "🥀", "💐", "🌵", "🌿", "🪴", "🍄", "🍀", "🍁", "🍂", "🍃", "🎋", "🎍"
-    ];
+    const AVATARS = ["👤", "🦉", "🦅", "🦜", "🦢", "🕊️", "🐧", "🐦", "🐤", "🦆", "🦩", "🦚", "🐓", "🐥", "🐦‍⬛", "🐦‍🔥", "🌸", "🌺", "🌻", "🌼", "🌷", "🌹", "🪻", "🪷", "🥀", "💐", "🌵", "🌿", "🪴", "🍄", "🍀", "🍁", "🍂", "🍃", "🎋", "🎍"];
     let selectedAvatar = "👤";
     let editingStaffId = null;
 
@@ -394,13 +386,12 @@
         });
     }
 
-    window.renderMonth = () => {
+    function renderMonth() {
         const [y, m] = document.getElementById('month-sel').value.split('-').map(Number);
         const grid = document.getElementById('cal-grid-body');
         grid.innerHTML = DAYS.map(d => `<div class="cal-head">${d}</div>`).join('');
-        const first = new Date(y, m, 1);
         const last = new Date(y, m + 1, 0).getDate();
-        let startPad = first.getDay() - 1; if(startPad === -1) startPad = 6;
+        let startPad = new Date(y, m, 1).getDay() - 1; if(startPad === -1) startPad = 6;
         for(let i=0; i<startPad; i++) grid.innerHTML += `<div class="cal-day empty"></div>`;
         for(let d=1; d<=last; d++){
             const date = new Date(y, m, d);
@@ -448,8 +439,7 @@
     window.selectAvatar = (a) => {
         selectedAvatar = a;
         document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
-        const el = document.getElementById('av-'+a);
-        if(el) el.classList.add('selected');
+        const el = document.getElementById('av-'+a); if(el) el.classList.add('selected');
     }
 
     function renderSettings() {
@@ -470,12 +460,9 @@
         const n = document.getElementById('new-staff-name').value;
         const i = document.getElementById('new-staff-init').value;
         if(!n || !i) return alert("Missing name or initials");
-        
         if (editingStaffId) {
             const index = state.staff.findIndex(x => x.id === editingStaffId);
-            state.staff[index].name = n;
-            state.staff[index].initials = i.toUpperCase();
-            state.staff[index].avatar = selectedAvatar;
+            state.staff[index].name = n; state.staff[index].initials = i.toUpperCase(); state.staff[index].avatar = selectedAvatar;
             cancelStaffEdit();
         } else {
             state.staff.push({id: Date.now(), name: n, initials: i.toUpperCase(), avatar: selectedAvatar});
@@ -492,17 +479,15 @@
         selectAvatar(s.avatar || "👤");
         document.getElementById('add-staff-btn').innerText = "Update Staff Member";
         document.getElementById('cancel-staff-btn').classList.remove('hidden');
-        document.getElementById('staff-form-title').innerText = "Edit Staff Member";
         document.getElementById('staff-form-card').scrollIntoView({behavior: 'smooth'});
     };
 
     window.cancelStaffEdit = () => {
         editingStaffId = null;
-        document.getElementById('new-staff-name').value = "";
-        document.getElementById('new-staff-init').value = "";
+        document.getElementById('new-staff-name').value = ""; document.getElementById('new-staff-init').value = "";
         document.getElementById('add-staff-btn').innerText = "Add New Member";
         document.getElementById('cancel-staff-btn').classList.add('hidden');
-        document.getElementById('staff-form-title').innerText = "Team Management";
+        selectAvatar("👤");
     };
 
     window.addCode = async () => {
@@ -520,7 +505,7 @@
         if(nLab && nHrs !== null) { c.label = nLab; c.hrs = parseFloat(nHrs); await sync(); }
     };
 
-    window.removeStaff = async (id) => { if(confirm('Delete staff member?')) { state.staff = state.staff.filter(x => x.id !== id); await sync(); } };
+    window.removeStaff = async (id) => { if(confirm('Delete staff?')) { state.staff = state.staff.filter(x => x.id !== id); await sync(); } };
     window.removeCode = async (id) => { if(confirm('Delete code?')) { state.codes = state.codes.filter(x => x.id !== id); await sync(); } };
 
     window.openPicker = (sId, dIdx) => {
@@ -563,7 +548,7 @@
             state.staff.forEach(s => {
                 const row = (state.rota[currentWeekKey] && state.rota[currentWeekKey][s.id]) ? state.rota[currentWeekKey][s.id] : Array(7).fill('off');
                 let t = 0;
-                h += `<tr><td><b>${s.avatar || ''} ${s.name}</b></td>${row.map(cId => { const c = state.codes.find(x=>x.id===cId); t+=(c?c.hrs:0); return `<td>${c?c.label:''}</td>`; }).join('')}<td><b>${t.toFixed(1)}</b></td></tr>`;
+                h += `<tr><td><b>${s.avatar !== '👤' ? s.avatar : ''} ${s.name}</b></td>${row.map(cId => { const c = state.codes.find(x=>x.id===cId); t+=(c?c.hrs:0); return `<td>${c?c.label:''}</td>`; }).join('')}<td><b>${t.toFixed(1)}</b></td></tr>`;
             });
             cont.innerHTML = h + "</table>";
         } else {
@@ -577,7 +562,7 @@
                         const c = state.codes.find(x=>x.id===cId);
                         if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED' && !c.label.toLowerCase().startsWith('away')) {
                             const suffix = c.label.toLowerCase().startsWith('hol') ? " (HOL)" : "";
-                            wrks.push(`${s.avatar || ''} ${s.name}${suffix}`);
+                            wrks.push(`${s.avatar !== '👤' ? s.avatar : ''} ${s.name}${suffix}`);
                         }
                     });
                 }

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Retail Rota Cloud Pro</title>
+    
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+      }
+    }
+    </script>
+    
+    <style>
+        :root {
+            --slate: #2d3436;
+            --slate-light: #636e72;
+            --forest: #00b894;
+            --mint: #e8f8f5;
+            --ios-blue: #0984e3;
+            --ios-bg: #f2f2f7;
+            --ios-card: #ffffff;
+            --ios-border: rgba(0,0,0,0.1);
+            --danger: #d63031;
+            --warning: #fdcb6e;
+            --nav-height: 75px;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+        }
+
+        body { 
+            background: var(--ios-bg); 
+            color: var(--slate); 
+            margin: 0; 
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 20px); 
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- LOGIN REDESIGN --- */
+        #login-screen { 
+            position: fixed; inset: 0; background: linear-gradient(135deg, #f2f2f7 0%, #dcdde1 100%);
+            z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; 
+        }
+        .login-card { 
+            background: var(--ios-card); width: 100%; max-width: 360px; padding: 40px 30px; 
+            border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); text-align: center; 
+        }
+        .login-logo {
+            width: 70px; height: 70px; background: var(--slate); border-radius: 18px;
+            margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 32px; font-weight: bold;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        input { 
+            width: 100%; padding: 16px; border: 1.5px solid #eee; border-radius: 14px; 
+            font-size: 16px; margin-bottom: 12px; outline: none; transition: border-color 0.2s;
+        }
+        input:focus { border-color: var(--ios-blue); }
+
+        /* --- HEADER & NAVIGATION (GLASSMORPHISM) --- */
+        header { 
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            padding: 20px; 
+            padding-top: calc(15px + var(--safe-top)); 
+            border-bottom: 0.5px solid var(--ios-border); 
+            position: sticky; top: 0; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        header h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: var(--slate); }
+
+        .sync-indicator {
+            display: flex; align-items: center; gap: 6px; font-size: 10px; 
+            font-weight: 700; color: var(--forest); text-transform: uppercase;
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; background: var(--forest); border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 148, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 184, 148, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 148, 0); }
+        }
+
+        .bottom-nav { 
+            position: fixed; bottom: 0; width: 100%; 
+            height: calc(var(--nav-height) + var(--safe-bottom)); 
+            background: rgba(255,255,255,0.85); 
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid var(--ios-border); 
+            display: flex; justify-content: space-around; 
+            padding-top: 12px; padding-bottom: var(--safe-bottom); z-index: 1000; 
+        }
+        .nav-item { 
+            display: flex; flex-direction: column; align-items: center; 
+            color: var(--ios-gray); font-size: 10px; font-weight: 600; text-decoration: none; flex: 1; 
+            transition: color 0.3s;
+        }
+        .nav-item.active { color: var(--ios-blue); }
+        .nav-item svg { width: 24px; height: 24px; margin-bottom: 4px; transition: transform 0.2s; }
+        .nav-item:active svg { transform: scale(0.85); }
+
+        /* --- CARDS & UI --- */
+        .content { padding: 15px; }
+        .card { 
+            background: var(--ios-card); border-radius: 20px; padding: 20px; 
+            margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+            transition: transform 0.1s;
+        }
+        .card:active { transform: scale(0.98); }
+
+        .btn-large { 
+            width: 100%; padding: 18px; background: var(--ios-blue); color: white; border: none; 
+            border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; 
+            margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 8px 15px rgba(9, 132, 227, 0.2);
+        }
+
+        /* --- WEEKLY VIEW --- */
+        .staff-header { 
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: 800; font-size: 19px; border-bottom: 1px solid var(--ios-bg); 
+            padding-bottom: 12px; margin-bottom: 12px; 
+        }
+        .staff-total-badge {
+            background: var(--mint); color: var(--forest); padding: 4px 12px;
+            border-radius: 20px; font-size: 14px; font-family: "SF Mono", monospace;
+        }
+        .day-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 12px 0; border-bottom: 0.5px solid var(--ios-bg); 
+        }
+        .day-label { color: var(--slate-light); font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .shift-badge { 
+            background: var(--ios-bg); padding: 8px 16px; border-radius: 10px; 
+            font-weight: 700; font-size: 13px; min-width: 95px; text-align: center;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+
+        /* --- MONTH GRID REDESIGN --- */
+        .cal-grid { 
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; 
+            background: var(--ios-border); border: 1.5px solid var(--ios-border); 
+            border-radius: 16px; overflow: hidden; background: #ddd;
+        }
+        .cal-head { background: #f8f8f8; padding: 10px 0; text-align: center; font-size: 10px; font-weight: 800; color: var(--ios-gray); text-transform: uppercase; }
+        .cal-day { 
+            background: #fff; min-height: 70px; display: flex; flex-direction: column; 
+            align-items: center; justify-content: flex-start; padding: 6px 2px; 
+            font-size: 13px; font-weight: 700; position: relative; 
+        }
+        .cal-day.empty { background: #f9f9fb; }
+        .cal-day.active { background: var(--ios-blue); color: #fff; }
+        .cal-day.active .initial-dot { background: white; color: var(--ios-blue); }
+        
+        /* CLOSED PATTERN */
+        .cal-day.day-closed {
+            background-image: repeating-linear-gradient(45deg, #f2f2f7, #f2f2f7 5px, #ffffff 5px, #ffffff 10px);
+            color: #ccc;
+        }
+
+        .initials-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; margin-top: 6px; width: 100%; }
+        .initial-dot { 
+            font-size: 9px; background: var(--slate); color: white; padding: 3px; 
+            border-radius: 6px; min-width: 18px; text-align: center; font-weight: 800; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .initial-dot.hol-shift { background: var(--warning); color: #856404; }
+        .initial-dot.away-shift { background: var(--away-color); color: var(--away-text); }
+
+        /* --- SCREENSHOT OVERLAY --- */
+        #ss-overlay { 
+            position: fixed; inset: 0; background: white; z-index: 9000; 
+            display: none; overflow-y: auto; padding: 25px; 
+            padding-top: calc(30px + var(--safe-top)); color: var(--slate); 
+        }
+        .ss-branding { border-bottom: 2px solid var(--slate); padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
+        .ss-branding h2 { margin: 0; font-family: "Georgia", serif; font-size: 26px; }
+        .ss-table { width: 100%; border-collapse: collapse; }
+        .ss-table th { background: var(--slate); color: white; padding: 10px; font-size: 11px; text-transform: uppercase; }
+        .ss-table td { border-bottom: 1px solid #eee; padding: 10px; text-align: center; font-size: 12px; }
+        .ss-table tr:nth-child(even) { background: #f9f9f9; } /* Zebra Striping */
+
+        /* --- PICKER --- */
+        #picker-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 8000; display: none; flex-direction: column; justify-content: flex-end; }
+        .picker-sheet { 
+            background: var(--ios-bg); border-radius: 28px 28px 0 0; padding: 25px; 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; 
+            max-height: 80vh; overflow-y: auto; padding-bottom: calc(30px + var(--safe-bottom)); 
+        }
+        .picker-btn {
+            background: white; border: none; padding: 18px; border-radius: 16px;
+            font-size: 15px; font-weight: 700; color: var(--slate);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .picker-btn:active { background: #eee; transform: scale(0.95); }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-card">
+        <div class="login-logo">🏴󠁧󠁢󠁷󠁬󠁳󠁿</div>
+        <h1 style="margin-bottom: 30px; letter-spacing: -1px;">Staff Portal</h1>
+        <input type="text" id="user-in" placeholder="Username">
+        <input type="password" id="pass-in" placeholder="Password">
+        <button class="btn-large" onclick="doLogin()">Login to Cloud</button>
+        <p id="l-err" class="hidden" style="color:var(--danger); font-size:14px; margin-top: 15px;">Invalid Credentials</p>
+    </div>
+</div>
+
+<div id="ss-overlay">
+    <button class="btn-large" style="background:#000" onclick="closeSS()">✕ Exit Screenshot Mode</button>
+    <div id="ss-content"></div>
+</div>
+
+<header id="header" class="hidden">
+    <h1 id="view-title">Weekly Rota</h1>
+    <div class="sync-indicator">
+        <div class="pulse-dot"></div>
+        Cloud Sync
+    </div>
+</header>
+
+<div id="app" class="content hidden">
+    <!-- Weekly View -->
+    <section id="tab-weekly">
+        <button class="btn-large" style="background:var(--forest)" onclick="openSS('week')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Weekly Screenshot
+        </button>
+        <div class="card">
+            <label style="font-size:10px; color:var(--ios-gray); font-weight: 800; text-transform: uppercase;">Planning Week</label>
+            <select id="week-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; outline:none; color:var(--ios-blue);" onchange="changeWeek(this.value)"></select>
+        </div>
+        <div id="weekly-container"></div>
+    </section>
+
+    <!-- Monthly View -->
+    <section id="tab-monthly" class="hidden">
+        <button class="btn-large" style="background:var(--forest)" onclick="openSS('month')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Monthly Screenshot
+        </button>
+        <div class="card">
+            <select id="month-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; color:var(--ios-blue); outline:none;" onchange="renderMonth()"></select>
+        </div>
+        <div class="cal-grid" id="cal-grid-body"></div>
+        <div id="day-detail" class="day-detail-box">
+            <div style="opacity:0.8; font-size:13px; font-weight: 600;">Tap a date to view coverage...</div>
+        </div>
+    </section>
+
+    <!-- Settings View -->
+    <section id="tab-settings" class="hidden">
+        <div class="card">
+            <h3>Team Management</h3>
+            <div id="staff-manage-list"></div>
+            <div style="display:flex; gap:10px; margin-top: 15px;">
+                <input type="text" id="new-staff-name" placeholder="Full Name">
+                <input type="text" id="new-staff-init" placeholder="Init" maxlength="2" style="width:70px">
+            </div>
+            <button class="btn-large" style="margin-top:5px" onclick="addStaff()">Add New Member</button>
+        </div>
+
+        <div class="card">
+            <h3>Shift Definitions</h3>
+            <div id="codes-manage-list"></div>
+            <div style="display:flex; gap:10px; margin-top: 15px;">
+                <input type="text" id="new-code-label" placeholder="e.g. 9-5">
+                <input type="number" id="new-code-hrs" placeholder="Hrs" style="width:75px">
+            </div>
+            <button class="btn-large" style="background:var(--slate-light); margin-top:5px" onclick="addCode()">Create Shift Code</button>
+        </div>
+
+        <div class="card">
+            <h3>Offline Security</h3>
+            <button class="btn-large" style="background:var(--forest); margin-bottom:10px" onclick="exportData()">💾 Backup to JSON</button>
+            <input type="file" id="import-file" style="font-size:12px; margin-bottom:10px">
+            <button class="btn-large" style="background:var(--slate-light)" onclick="importData()">📥 Restore Backup</button>
+        </div>
+
+        <button class="btn-large" style="background:var(--danger)" onclick="logout()">Sign Out</button>
+    </section>
+</div>
+
+<!-- Navigation Bar (SVG Icons) -->
+<nav id="nav" class="bottom-nav hidden">
+    <div class="nav-item active" onclick="switchTab('weekly', this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <span>Weekly</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('monthly', this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+        <span>Monthly</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('settings', this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span>Settings</span>
+    </div>
+</nav>
+
+<div id="picker-overlay" onclick="closePicker()">
+    <div class="picker-sheet" id="picker-btns" onclick="event.stopPropagation()"></div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "firebase/app";
+    import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDC0EZhyKmHr7OcPglNlqdcmQu58SHR5Fc",
+        authDomain: "ccove-441e0.firebaseapp.com",
+        projectId: "ccove-441e0",
+        storageBucket: "ccove-441e0.firebasestorage.app",
+        messagingSenderId: "1080815446710",
+        appId: "1:1080815446710:web:60f499bbbbdc781d6ad417"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let state = {
+        staff: [{id: 1, name: "Sandra", initials: "SA"}],
+        codes: [
+            {id:'off', label:'OFF', hrs:0}, 
+            {id:'closed', label:'CLOSED', hrs:0},
+            {id:'s1', label:'9-5.30', hrs:8.5}
+        ],
+        rota: {}
+    };
+
+    const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const BH = [
+        '2026-08-31','2026-12-25','2026-12-28',
+        '2027-01-01','2027-03-26','2027-03-29','2027-05-03','2027-05-31','2027-08-30','2027-12-27','2027-12-28'
+    ];
+    let currentWeekKey = "";
+    let activeEdit = { sId: null, dIdx: null };
+
+    function getMonKey(d) {
+        const date = new Date(d);
+        date.setUTCHours(0, 0, 0, 0);
+        const day = date.getUTCDay();
+        const diff = date.getUTCDate() - day + (day === 0 ? -6 : 1);
+        return new Date(date.setUTCDate(diff)).toISOString().split('T')[0];
+    }
+
+    window.doLogin = () => {
+        if(document.getElementById('user-in').value === 'creative' && document.getElementById('pass-in').value === 'uncreative') {
+            localStorage.setItem('rota_v10_auth', 'true');
+            init();
+        } else document.getElementById('l-err').classList.remove('hidden');
+    };
+
+    function init() {
+        if(localStorage.getItem('rota_v10_auth') !== 'true') return;
+        document.getElementById('login-screen').classList.add('hidden');
+        ['header','app','nav'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+        setupSelectors();
+        onSnapshot(doc(db, "rotaData", "global"), (s) => {
+            if(s.exists()){ state = s.data(); renderWeekly(); if(window.currentTab==='monthly') renderMonth(); if(window.currentTab==='settings') renderSettings(); }
+        });
+    }
+
+    async function sync() { await setDoc(doc(db, "rotaData", "global"), state); }
+
+    function setupSelectors() {
+        const wS = document.getElementById('week-sel');
+        let d = new Date(); d.setDate(d.getDate() - 21);
+        for(let i=0; i<60; i++){
+            let k = getMonKey(d);
+            wS.add(new Option(new Date(k).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}), k));
+            d.setDate(d.getDate()+7);
+        }
+        currentWeekKey = getMonKey(new Date());
+        wS.value = currentWeekKey;
+
+        const mS = document.getElementById('month-sel');
+        for(let i=-2; i<18; i++){
+            let d = new Date(); d.setMonth(d.getMonth()+i);
+            mS.add(new Option(d.toLocaleDateString('en-GB',{month:'long',year:'numeric'}), `${d.getFullYear()}-${d.getMonth()}`));
+        }
+        mS.value = `${new Date().getFullYear()}-${new Date().getMonth()}`;
+    }
+
+    window.switchTab = (t, el) => {
+        window.currentTab = t;
+        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+        document.getElementById('tab-'+t).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('view-title').innerText = t.charAt(0).toUpperCase() + t.slice(1) + " View";
+        if(t==='monthly') renderMonth(); else if(t==='settings') renderSettings(); else renderWeekly();
+    };
+
+    function renderWeekly() {
+        const cont = document.getElementById('weekly-container');
+        cont.innerHTML = "";
+        const wk = currentWeekKey;
+        if(!state.rota[wk]) state.rota[wk] = {};
+
+        state.staff.forEach(s => {
+            if(!state.rota[wk][s.id]) {
+                const closedCode = state.codes.find(c => c.label.toUpperCase() === 'CLOSED');
+                const defaultId = closedCode ? closedCode.id : 'off';
+                state.rota[wk][s.id] = DAYS.map((_, i) => i === 6 ? defaultId : 'off');
+            }
+            let total = 0;
+            let rows = '';
+            state.rota[wk][s.id].forEach((cId, i) => {
+                const c = state.codes.find(x => x.id===cId) || state.codes[0];
+                total += c.hrs || 0;
+                rows += `<div class="day-row" onclick="openPicker(${s.id},${i})"><span class="day-label">${DAYS[i]}</span><div class="shift-badge">${c.label}</div></div>`;
+            });
+            cont.innerHTML += `<div class="card"><div class="staff-header"><span>${s.name}</span><span class="staff-total-badge">${total.toFixed(1)}h</span></div>${rows}</div>`;
+        });
+    }
+
+    window.renderMonth = () => {
+        const [y, m] = document.getElementById('month-sel').value.split('-').map(Number);
+        const grid = document.getElementById('cal-grid-body');
+        grid.innerHTML = DAYS.map(d => `<div class="cal-head">${d}</div>`).join('');
+
+        const first = new Date(y, m, 1);
+        const last = new Date(y, m + 1, 0).getDate();
+        let startPad = first.getDay() - 1; if(startPad === -1) startPad = 6;
+
+        for(let i=0; i<startPad; i++) grid.innerHTML += `<div class="cal-day empty"></div>`;
+
+        for(let d=1; d<=last; d++){
+            const date = new Date(y, m, d);
+            const iso = date.toISOString().split('T')[0];
+            const wk = getMonKey(date);
+            const dIdx = (date.getDay() + 6) % 7;
+            const isBankHoliday = BH.includes(iso);
+            let isClosedDay = false;
+            
+            let badges = [];
+            if(state.rota[wk]) {
+                state.staff.forEach(s => {
+                    const cId = (state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
+                    const c = state.codes.find(x=>x.id===cId);
+                    if (c && c.label.toUpperCase() === 'CLOSED') isClosedDay = true;
+                    if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') {
+                        const isHol = c.label.toLowerCase().startsWith('hol');
+                        const isAway = c.label.toLowerCase().startsWith('away');
+                        badges.push(`<div class="initial-dot ${isHol?'hol-shift':''} ${isAway?'away-shift':''}">${s.initials}</div>`);
+                    }
+                });
+            }
+            grid.innerHTML += `<div class="cal-day ${isBankHoliday?'is-bh':''} ${isClosedDay?'day-closed':''}" onclick="showDayDetails(${y},${m},${d}, this)">
+                                ${d}${isBankHoliday?'<div class="bh-dot"></div>':''}
+                                <div class="initials-container">${badges.join('')}</div>
+                               </div>`;
+        }
+    };
+
+    window.showDayDetails = (y,m,d, el) => {
+        document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('active'));
+        el.classList.add('active');
+        const date = new Date(y, m, d);
+        const wk = getMonKey(date);
+        const dIdx = (date.getDay() + 6) % 7;
+        let staff = [];
+        state.staff.forEach(s => {
+            const cId = (state.rota[wk] && state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
+            const c = state.codes.find(x=>x.id===cId);
+            if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') staff.push(`<b>${s.name}:</b> ${c.label}`);
+        });
+        document.getElementById('day-detail').innerHTML = `<b>${d} ${new Date(y,m).toLocaleString('en-GB',{month:'short'})}:</b><br>${staff.length ? staff.join('<br>') : 'Shop is closed or no staff set'}`;
+    };
+
+    function renderSettings() {
+        const sList = document.getElementById('staff-manage-list');
+        sList.innerHTML = "";
+        state.staff.forEach(s => {
+            sList.innerHTML += `<div class="day-row">
+                <span><b>${s.name}</b> (${s.initials})</span>
+                <div>
+                    <button class="btn-sm" style="background:var(--ios-blue); color:white" onclick="editStaff(${s.id})">Edit</button>
+                    <button class="btn-sm" style="background:var(--danger); color:white" onclick="removeStaff(${s.id})">Del</button>
+                </div>
+            </div>`;
+        });
+
+        const cList = document.getElementById('codes-manage-list');
+        cList.innerHTML = "";
+        state.codes.forEach(c => {
+            if(c.id === 'off') return;
+            cList.innerHTML += `<div class="day-row">
+                <span><b>${c.label}</b> (${c.hrs}h)</span>
+                <div>
+                    <button class="btn-sm" style="background:var(--ios-blue); color:white" onclick="editCode('${c.id}')">Edit</button>
+                    <button class="btn-sm" style="background:var(--danger); color:white" onclick="removeCode('${c.id}')">Del</button>
+                </div>
+            </div>`;
+        });
+    }
+
+    window.addStaff = async () => {
+        const n = document.getElementById('new-staff-name').value;
+        const i = document.getElementById('new-staff-init').value;
+        if(!n || !i) return;
+        state.staff.push({id: Date.now(), name: n, initials: i.toUpperCase()});
+        document.getElementById('new-staff-name').value = "";
+        document.getElementById('new-staff-init').value = "";
+        await sync();
+    };
+
+    window.editStaff = async (id) => {
+        const s = state.staff.find(x => x.id === id);
+        const nName = prompt("Update Name:", s.name);
+        const nInit = prompt("Update Initials:", s.initials);
+        if(nName && nInit) { s.name = nName; s.initials = nInit.toUpperCase().substring(0,2); await sync(); }
+    };
+
+    window.addCode = async () => {
+        const l = document.getElementById('new-code-label').value;
+        const h = parseFloat(document.getElementById('new-code-hrs').value);
+        if(!l) return;
+        state.codes.push({id: 'c'+Date.now(), label: l, hrs: h || 0});
+        document.getElementById('new-code-label').value = "";
+        document.getElementById('new-code-hrs').value = "";
+        await sync();
+    };
+
+    window.editCode = async (id) => {
+        const c = state.codes.find(x => x.id === id);
+        const nLab = prompt("Update Label:", c.label);
+        const nHrs = prompt("Update Hours:", c.hrs);
+        if(nLab && nHrs !== null) { c.label = nLab; c.hrs = parseFloat(nHrs); await sync(); }
+    };
+
+    window.removeStaff = async (id) => { if(confirm('Delete staff?')) { state.staff = state.staff.filter(x => x.id !== id); await sync(); } };
+    window.removeCode = async (id) => { if(confirm('Delete code?')) { state.codes = state.codes.filter(x => x.id !== id); await sync(); } };
+
+    window.openPicker = (sId, dIdx) => {
+        activeEdit = {sId, dIdx};
+        const cont = document.getElementById('picker-btns');
+        cont.innerHTML = state.codes.map(c => `<button class="picker-btn" onclick="setShift('${c.id}')">${c.label}</button>`).join('') + `<button class="picker-btn" style="background:#eee" onclick="closePicker()">Cancel</button>`;
+        document.getElementById('picker-overlay').style.display = 'flex';
+    };
+    window.closePicker = () => document.getElementById('picker-overlay').style.display = 'none';
+    window.setShift = async (cId) => {
+        if(!state.rota[currentWeekKey]) state.rota[currentWeekKey] = {};
+        if(!state.rota[currentWeekKey][activeEdit.sId]) state.rota[currentWeekKey][activeEdit.sId] = Array(7).fill('off');
+        state.rota[currentWeekKey][activeEdit.sId][activeEdit.dIdx] = cId;
+        closePicker(); renderWeekly(); await sync();
+    };
+    window.changeWeek = (v) => { currentWeekKey = v; renderWeekly(); };
+    window.logout = () => { localStorage.removeItem('rota_v10_auth'); location.reload(); };
+
+    window.exportData = () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+        const dlAnchor = document.createElement('a');
+        dlAnchor.setAttribute("href", dataStr);
+        dlAnchor.setAttribute("download", `rota_backup_${new Date().toISOString().split('T')[0]}.json`);
+        dlAnchor.click();
+    };
+
+    window.importData = () => {
+        const file = document.getElementById('import-file').files[0];
+        if(!file) return alert("Select a file first");
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try { state = JSON.parse(e.target.result); await sync(); location.reload(); } catch (err) { alert("Invalid JSON file"); }
+        };
+        reader.readAsText(file);
+    };
+
+    window.openSS = (type) => {
+        const cont = document.getElementById('ss-content');
+        const branding = `<div class="ss-branding"><h2>Retail Rota Pro</h2><p>${new Date().toLocaleDateString('en-GB')}</p></div>`;
+        if(type === 'week') {
+            let h = branding + `<h3>Week: ${currentWeekKey}</h3><table class="ss-table"><tr><th>Staff</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr>`;
+            state.staff.forEach(s => {
+                const row = (state.rota[currentWeekKey] && state.rota[currentWeekKey][s.id]) ? state.rota[currentWeekKey][s.id] : Array(7).fill('off');
+                let t = 0;
+                h += `<tr><td><b>${s.name}</b></td>${row.map(cId => { const c = state.codes.find(x=>x.id===cId); t+=(c?c.hrs:0); return `<td>${c?c.label:''}</td>`; }).join('')}<td><b>${t.toFixed(1)}</b></td></tr>`;
+            });
+            cont.innerHTML = h + "</table>";
+        } else {
+            const [y, m] = document.getElementById('month-sel').value.split('-').map(Number);
+            let h = branding + `<h3>${new Date(y,m).toLocaleString('en-GB',{month:'long',year:'numeric'})}</h3><table class="ss-table"><tr><th>Date</th><th>Staff Working</th></tr>`;
+            for(let d=1; d<=new Date(y,m+1,0).getDate(); d++){
+                const dt = new Date(y,m,d);
+                const wk = getMonKey(dt);
+                const dIdx = (dt.getDay()+6)%7;
+                let wrks = [];
+                if(state.rota[wk]) {
+                    state.staff.forEach(s => {
+                        const cId = state.rota[wk][s.id] ? state.rota[wk][s.id][dIdx] : 'off';
+                        const c = state.codes.find(x=>x.id===cId);
+                        if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') {
+                            const suffix = c.label.toLowerCase().startsWith('hol') ? " (HOL)" : "";
+                            wrks.push(`${s.name}${suffix}`);
+                        }
+                    });
+                }
+                if(wrks.length) h += `<tr><td><b>${d} ${DAYS[dIdx]}</b></td><td style="text-align:left">${wrks.join(', ')}</td></tr>`;
+            }
+            cont.innerHTML = h + "</table>";
+        }
+        document.getElementById('ss-overlay').style.display = 'block';
+    };
+    window.closeSS = () => document.getElementById('ss-overlay').style.display = 'none';
+
+    init();
+</script>
+</body>
+</html>

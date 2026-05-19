@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Retail Rota Cloud</title>
-    <!-- Firebase SDKs -->
+    <title>Retail Rota Pro</title>
     <script type="importmap">
     {
       "imports": {
@@ -22,85 +21,83 @@
             --danger: #ff3b30; --success: #34c759; --nav-height: 85px;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, system-ui, sans-serif; }
-        body { background: var(--ios-bg); color: var(--ios-text); margin: 0; padding-bottom: var(--nav-height); height: 100vh; }
+        body { background: var(--ios-bg); color: var(--ios-text); margin: 0; padding-bottom: var(--nav-height); height: 100vh; overflow-x: hidden; }
         
-        /* Login Screen */
+        /* Login */
         #login-screen { position: fixed; inset: 0; background: var(--ios-bg); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .login-card { background: var(--ios-card); width: 100%; max-width: 350px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
         input { width: 100%; padding: 15px; border: 1px solid var(--ios-border); border-radius: 12px; font-size: 16px; margin-bottom: 12px; outline: none; background: #fff; }
 
         /* Header */
         header { background: var(--ios-card); padding: 50px 20px 15px; border-bottom: 0.5px solid var(--ios-border); position: sticky; top: 0; z-index: 100; }
-        h1 { margin: 0; font-size: 24px; font-weight: 700; }
+        h1 { margin: 0; font-size: 22px; font-weight: 700; }
 
-        /* Main Sections */
+        /* General UI */
         .content { padding: 15px; }
         .card { background: var(--ios-card); border-radius: 14px; padding: 16px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .btn-large { width: 100%; padding: 16px; background: var(--ios-blue); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; display: block; text-align: center; text-decoration: none; }
-        .btn-success { background: var(--success); }
+        .btn-large { width: 100%; padding: 16px; background: var(--ios-blue); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; display: block; text-align: center; }
 
         /* Weekly Cards */
-        .staff-header { display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; border-bottom: 1px solid var(--ios-bg); padding-bottom: 10px; margin-bottom: 10px; }
-        .day-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 0.5px solid var(--ios-bg); }
-        .day-row:last-child { border-bottom: none; }
-        .shift-badge { background: var(--ios-bg); padding: 8px 12px; border-radius: 8px; font-weight: 600; min-width: 100px; text-align: center; font-size: 14px; }
+        .staff-header { display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; border-bottom: 1px solid var(--ios-bg); padding-bottom: 8px; margin-bottom: 8px; }
+        .day-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--ios-bg); }
+        .shift-badge { background: var(--ios-bg); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; min-width: 85px; text-align: center; }
 
-        /* Monthly List */
-        .m-day { display: flex; background: white; padding: 12px; border-radius: 12px; margin-bottom: 8px; align-items: center; }
-        .m-date { width: 45px; font-weight: bold; text-align: center; border-right: 1px solid var(--ios-bg); margin-right: 12px; flex-shrink: 0; }
-        .m-staff { font-size: 14px; color: #333; line-height: 1.4; }
+        /* CALENDAR GRID STYLES */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; background: var(--ios-border); border: 1px solid var(--ios-border); border-radius: 10px; overflow: hidden; }
+        .cal-head { background: #f8f8f8; padding: 8px 0; text-align: center; font-size: 10px; font-weight: bold; color: var(--ios-gray); }
+        .cal-day { background: #fff; aspect-ratio: 1/1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; position: relative; }
+        .cal-day.empty { background: #f2f2f7; }
+        .cal-day.has-shifts::after { content: ''; width: 4px; height: 4px; background: var(--ios-blue); border-radius: 50%; position: absolute; bottom: 4px; }
+        .cal-day.active { background: var(--ios-blue); color: #fff; }
+        .cal-day.active::after { background: #fff; }
 
-        /* Screenshot Overlay */
-        #ss-overlay { position: fixed; inset: 0; background: white; z-index: 9000; display: none; overflow-y: auto; padding: 20px; color: black; }
-        .ss-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .ss-table th, .ss-table td { border: 1px solid #000; padding: 8px; text-align: center; font-size: 12px; }
-        .ss-title { text-align: center; font-weight: bold; font-size: 20px; margin-bottom: 10px; }
+        .day-detail-box { background: var(--ios-blue); color: #fff; padding: 15px; border-radius: 14px; margin-top: 15px; min-height: 60px; }
 
-        /* Bottom Nav */
+        /* Screenshot Mode */
+        #ss-overlay { position: fixed; inset: 0; background: white; z-index: 9000; display: none; overflow-y: auto; padding: 15px; color: black; }
+        .ss-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+        .ss-table th, .ss-table td { border: 1px solid #ddd; padding: 6px 2px; text-align: center; font-size: 10px; overflow: hidden; }
+        .ss-table th { background: #f0f0f0; }
+
+        /* Navigation */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; height: var(--nav-height); background: rgba(255,255,255,0.9); backdrop-filter: blur(15px); border-top: 0.5px solid var(--ios-border); display: flex; justify-content: space-around; padding-top: 10px; z-index: 1000; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--ios-gray); font-size: 11px; text-decoration: none; flex: 1; }
         .nav-item.active { color: var(--ios-blue); }
-        .nav-icon { font-size: 24px; margin-bottom: 4px; }
+        .nav-icon { font-size: 22px; margin-bottom: 4px; }
 
-        /* Picker Sheet */
         #picker-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 8000; display: none; flex-direction: column; justify-content: flex-end; }
         .picker-sheet { background: var(--ios-bg); border-radius: 20px 20px 0 0; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
         .hidden { display: none !important; }
-        .loader { text-align: center; padding: 20px; color: var(--ios-gray); }
     </style>
 </head>
 <body>
 
-<!-- Login -->
 <div id="login-screen">
     <div class="login-card">
-        <div style="font-size: 40px; margin-bottom: 10px;">🏴󠁧󠁢󠁷󠁬󠁳󠁿</div>
-        <h1>Staff Portal</h1>
+        <h1 style="margin:0 0 10px">Retail Portal</h1>
         <input type="text" id="user-in" placeholder="Username">
         <input type="password" id="pass-in" placeholder="Password">
         <button class="btn-large" onclick="doLogin()">Login</button>
-        <p id="login-err" class="hidden" style="color:var(--danger); font-size: 14px;">Invalid Access</p>
+        <p id="l-err" class="hidden" style="color:red; font-size:14px">Access Denied</p>
     </div>
 </div>
 
-<!-- Screenshot Overlay -->
 <div id="ss-overlay">
-    <button class="btn-large" style="background:#000" onclick="closeSS()">✕ Close Screenshot Mode</button>
+    <button class="btn-large" style="background:#000" onclick="closeSS()">✕ Exit Screenshot Mode</button>
     <div id="ss-content"></div>
 </div>
 
-<!-- App -->
 <header id="header" class="hidden">
-    <h1 id="view-title">Weekly Rota</h1>
+    <h1 id="view-title">Weekly View</h1>
 </header>
 
 <div id="app" class="content hidden">
     <!-- Weekly -->
     <section id="tab-weekly">
-        <button class="btn-large btn-success" onclick="openSS('week')">📸 Weekly Screenshot</button>
+        <button class="btn-large" style="background:var(--success)" onclick="openSS('week')">📸 Weekly Screenshot</button>
         <div class="card">
-            <label style="font-size:11px; color:var(--ios-gray)">WEEK COMMENCING (MON)</label>
+            <label style="font-size:10px; color:var(--ios-gray)">WEEK COMMENCING</label>
             <select id="week-sel" style="width:100%; border:none; font-size:18px; font-weight:bold; background:none;" onchange="changeWeek(this.value)"></select>
         </div>
         <div id="weekly-container"></div>
@@ -108,33 +105,28 @@
 
     <!-- Monthly -->
     <section id="tab-monthly" class="hidden">
-        <button class="btn-large btn-success" onclick="openSS('month')">📸 Monthly Screenshot</button>
+        <button class="btn-large" style="background:var(--success)" onclick="openSS('month')">📸 Monthly Screenshot</button>
         <div class="card">
             <select id="month-sel" style="width:100%; border:none; font-size:18px; font-weight:bold; background:none;" onchange="renderMonth()"></select>
         </div>
-        <div id="monthly-container"></div>
+        <div class="cal-grid" id="cal-grid-body"></div>
+        <div id="day-detail" class="day-detail-box">
+            <div style="opacity:0.7; font-size:12px">Select a date to see staff...</div>
+        </div>
     </section>
 
     <!-- Settings -->
     <section id="tab-settings" class="hidden">
         <div class="card">
-            <h3>Staff Management</h3>
+            <h3>Staff Members</h3>
             <div id="staff-manage-list"></div>
-            <input type="text" id="new-staff-name" placeholder="Staff Name">
+            <input type="text" id="new-staff-name" placeholder="Name">
             <button class="btn-large" onclick="addStaff()">Add Staff</button>
-        </div>
-        <div class="card">
-            <h3>Shift Codes</h3>
-            <div id="codes-manage-list"></div>
-            <input type="text" id="new-code-label" placeholder="Code (e.g. 9-5)">
-            <input type="number" id="new-code-hrs" placeholder="Hours (e.g. 8)">
-            <button class="btn-large" style="background:var(--ios-gray)" onclick="addCode()">Add Code</button>
         </div>
         <button class="btn-large" style="background:var(--danger)" onclick="logout()">Logout</button>
     </section>
 </div>
 
-<!-- Nav -->
 <nav id="nav" class="bottom-nav hidden">
     <div class="nav-item active" onclick="switchTab('weekly', this)">
         <span class="nav-icon">📅</span><span>Weekly</span>
@@ -147,7 +139,6 @@
     </div>
 </nav>
 
-<!-- Picker -->
 <div id="picker-overlay" onclick="closePicker()">
     <div class="picker-sheet" id="picker-btns" onclick="event.stopPropagation()"></div>
 </div>
@@ -168,9 +159,8 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // --- State ---
     let state = {
-        staff: [{id: 1, name: "Sandra"}, {id: 2, name: "Ali"}, {id: 3, name: "Catherine"}],
+        staff: [{id: 1, name: "Sandra"}, {id: 2, name: "Ali"}],
         codes: [{id:'off', label:'OFF', hrs:0}, {id:'s1', label:'9-5.30', hrs:8.5}, {id:'s2', label:'9-1', hrs:4}, {id:'hol', label:'HOL', hrs:0}],
         rota: {}
     };
@@ -179,252 +169,176 @@
     let currentWeekKey = "";
     let activeEdit = { sId: null, dIdx: null };
 
-    // --- Date Logic (The Fix) ---
-    function getMondayKey(dateObj) {
-        const d = new Date(dateObj);
-        d.setUTCHours(0, 0, 0, 0);
-        const day = d.getUTCDay();
-        const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1);
-        const mon = new Date(d.setUTCDate(diff));
-        return mon.toISOString().split('T')[0];
+    // --- Core Sync ---
+    function getMonKey(d) {
+        const date = new Date(d);
+        date.setUTCHours(0, 0, 0, 0);
+        const day = date.getUTCDay();
+        const diff = date.getUTCDate() - day + (day === 0 ? -6 : 1);
+        return new Date(date.setUTCDate(diff)).toISOString().split('T')[0];
     }
 
-    // --- Auth ---
     window.doLogin = () => {
-        const u = document.getElementById('user-in').value;
-        const p = document.getElementById('pass-in').value;
-        if(u === 'creative' && p === 'uncreative') {
-            localStorage.setItem('rota_auth_v6', 'true');
-            startApp();
-        } else {
-            document.getElementById('login-err').classList.remove('hidden');
-        }
+        if(document.getElementById('user-in').value === 'creative' && document.getElementById('pass-in').value === 'uncreative') {
+            localStorage.setItem('rota_v7_auth', 'true');
+            init();
+        } else document.getElementById('l-err').classList.remove('hidden');
     };
 
-    window.logout = () => {
-        localStorage.removeItem('rota_auth_v6');
-        location.reload();
-    };
-
-    // --- Core ---
-    function startApp() {
-        if(localStorage.getItem('rota_auth_v6') !== 'true') return;
+    function init() {
+        if(localStorage.getItem('rota_v7_auth') !== 'true') return;
         document.getElementById('login-screen').classList.add('hidden');
         ['header','app','nav'].forEach(id => document.getElementById(id).classList.remove('hidden'));
 
         setupSelectors();
-        
-        // Listen to Firebase
-        onSnapshot(doc(db, "rotaData", "global"), (docSnap) => {
-            if (docSnap.exists()) {
-                state = docSnap.data();
-                renderWeekly();
-                if(!document.getElementById('tab-monthly').classList.contains('hidden')) renderMonth();
-            }
+        onSnapshot(doc(db, "rotaData", "global"), (s) => {
+            if(s.exists()){ state = s.data(); renderWeekly(); if(window.currentTab==='monthly') renderMonth(); }
         });
     }
 
-    async function sync() {
-        await setDoc(doc(db, "rotaData", "global"), state);
-    }
+    async function sync() { await setDoc(doc(db, "rotaData", "global"), state); }
 
     function setupSelectors() {
-        const wSel = document.getElementById('week-sel');
-        let d = new Date(); d.setDate(d.getDate() - 14);
-        for(let i=0; i<40; i++) {
-            let mon = getMondayKey(d);
-            let label = new Date(mon).toLocaleDateString('en-GB', {day:'2-digit', month:'short'});
-            wSel.add(new Option(`Week of ${label}`, mon));
-            d.setDate(d.getDate() + 7);
+        const wS = document.getElementById('week-sel');
+        let d = new Date(); d.setDate(d.getDate() - 21);
+        for(let i=0; i<40; i++){
+            let k = getMonKey(d);
+            wS.add(new Option(new Date(k).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}), k));
+            d.setDate(d.getDate()+7);
         }
-        currentWeekKey = getMondayKey(new Date());
-        wSel.value = currentWeekKey;
+        currentWeekKey = getMonKey(new Date());
+        wS.value = currentWeekKey;
 
-        const mSel = document.getElementById('month-sel');
-        for(let i=-1; i<6; i++) {
-            let mDate = new Date(); mDate.setMonth(mDate.getMonth() + i);
-            let val = `${mDate.getFullYear()}-${mDate.getMonth()}`;
-            mSel.add(new Option(mDate.toLocaleDateString('en-GB', {month:'long', year:'numeric'}), val));
+        const mS = document.getElementById('month-sel');
+        for(let i=-1; i<6; i++){
+            let d = new Date(); d.setMonth(d.getMonth()+i);
+            mS.add(new Option(d.toLocaleDateString('en-GB',{month:'long',year:'numeric'}), `${d.getFullYear()}-${d.getMonth()}`));
         }
-        mSel.value = `${new Date().getFullYear()}-${new Date().getMonth()}`;
+        mS.value = `${new Date().getFullYear()}-${new Date().getMonth()}`;
     }
 
-    window.changeWeek = (v) => { currentWeekKey = v; renderWeekly(); };
-
     window.switchTab = (t, el) => {
+        window.currentTab = t;
         document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
         document.getElementById('tab-'+t).classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        document.getElementById('view-title').innerText = t.charAt(0).toUpperCase() + t.slice(1) + " View";
-        if(t === 'monthly') renderMonth();
-        if(t === 'weekly') renderWeekly();
+        document.getElementById('view-title').innerText = t.charAt(0).toUpperCase() + t.slice(1);
+        if(t==='monthly') renderMonth(); else renderWeekly();
     };
 
-    // --- Views ---
+    // --- Weekly View ---
     function renderWeekly() {
-        const container = document.getElementById('weekly-container');
-        container.innerHTML = "";
+        const cont = document.getElementById('weekly-container');
+        cont.innerHTML = "";
         const wk = currentWeekKey;
-
         if(!state.rota[wk]) state.rota[wk] = {};
 
         state.staff.forEach(s => {
             if(!state.rota[wk][s.id]) state.rota[wk][s.id] = Array(7).fill('off');
-            
-            let hrs = 0;
-            const card = document.createElement('div');
-            card.className = 'card';
-            let html = `<div class="staff-header"><span>${s.name}</span><span style="color:var(--ios-blue)">${calculateTotal(wk, s.id)}h</span></div>`;
-            
-            state.rota[wk][s.id].forEach((cId, idx) => {
-                const c = state.codes.find(x => x.id === cId) || state.codes[0];
-                html += `<div class="day-row" onclick="openPicker(${s.id}, ${idx})">
-                            <span style="color:var(--ios-gray)">${DAYS[idx]}</span>
-                            <div class="shift-badge">${c.label}</div>
-                         </div>`;
+            let total = 0;
+            let rows = '';
+            state.rota[wk][s.id].forEach((cId, i) => {
+                const c = state.codes.find(x => x.id===cId) || state.codes[0];
+                total += c.hrs;
+                rows += `<div class="day-row" onclick="openPicker(${s.id},${i})"><span>${DAYS[i]}</span><div class="shift-badge">${c.label}</div></div>`;
             });
-            card.innerHTML = html;
-            container.appendChild(card);
+            cont.innerHTML += `<div class="card"><div class="staff-header"><span>${s.name}</span><span style="color:var(--ios-blue)">${total}h</span></div>${rows}</div>`;
         });
     }
 
-    function calculateTotal(wk, sId) {
-        if(!state.rota[wk] || !state.rota[wk][sId]) return 0;
-        return state.rota[wk][sId].reduce((acc, cId) => {
-            const c = state.codes.find(x => x.id === cId);
-            return acc + (c ? c.hrs : 0);
-        }, 0);
-    }
-
+    // --- Month View (GRID) ---
     window.renderMonth = () => {
         const [y, m] = document.getElementById('month-sel').value.split('-').map(Number);
-        const container = document.getElementById('monthly-container');
-        container.innerHTML = "";
-        const lastDate = new Date(y, m + 1, 0).getDate();
+        const grid = document.getElementById('cal-grid-body');
+        grid.innerHTML = DAYS.map(d => `<div class="cal-head">${d}</div>`).join('');
 
-        for(let d=1; d<=lastDate; d++) {
-            const dt = new Date(y, m, d);
-            const wkKey = getMondayKey(dt);
-            const dIdx = (dt.getDay() + 6) % 7;
-            
-            let workers = [];
-            if(state.rota[wkKey]) {
+        const first = new Date(y, m, 1);
+        const last = new Date(y, m + 1, 0).getDate();
+        let startPad = first.getDay() - 1; if(startPad === -1) startPad = 6;
+
+        for(let i=0; i<startPad; i++) grid.innerHTML += `<div class="cal-day empty"></div>`;
+
+        for(let d=1; d<=last; d++){
+            const date = new Date(y, m, d);
+            const wk = getMonKey(date);
+            const dIdx = (date.getDay() + 6) % 7;
+            let hasWork = false;
+            if(state.rota[wk]) {
                 state.staff.forEach(s => {
-                    const cId = (state.rota[wkKey][s.id]) ? state.rota[wkKey][s.id][dIdx] : 'off';
-                    const c = state.codes.find(x => x.id === cId);
-                    if(c && c.hrs > 0) workers.push(`${s.name} (${c.label})`);
+                    const cId = (state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
+                    if(state.codes.find(x=>x.id===cId).hrs > 0) hasWork = true;
                 });
             }
-
-            const row = document.createElement('div');
-            row.className = 'm-day';
-            row.innerHTML = `<div class="m-date">${d}<br><small>${DAYS[dIdx]}</small></div>
-                             <div class="m-staff">${workers.length ? workers.join(', ') : '<span style="color:#ccc">---</span>'}</div>`;
-            container.appendChild(row);
+            grid.innerHTML += `<div class="cal-day ${hasWork?'has-shifts':''}" onclick="showDayDetails(${y},${m},${d}, this)">${d}</div>`;
         }
-    }
-
-    // --- Actions ---
-    window.openPicker = (sId, dIdx) => {
-        activeEdit = {sId, dIdx};
-        const cont = document.getElementById('picker-btns');
-        cont.innerHTML = "";
-        state.codes.forEach(c => {
-            const b = document.createElement('button');
-            b.className = 'btn-large'; b.style.background = '#fff'; b.style.color = '#000';
-            b.innerText = c.label;
-            b.onclick = () => selectShift(c.id);
-            cont.appendChild(b);
-        });
-        document.getElementById('picker-overlay').style.display = 'flex';
     };
 
-    window.closePicker = () => document.getElementById('picker-overlay').style.display = 'none';
+    window.showDayDetails = (y,m,d, el) => {
+        document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('active'));
+        el.classList.add('active');
+        const date = new Date(y, m, d);
+        const wk = getMonKey(date);
+        const dIdx = (date.getDay() + 6) % 7;
+        let staff = [];
+        state.staff.forEach(s => {
+            const cId = (state.rota[wk] && state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
+            const c = state.codes.find(x=>x.id===cId);
+            if(c.hrs > 0) staff.push(`<b>${s.name}:</b> ${c.label}`);
+        });
+        document.getElementById('day-detail').innerHTML = `<b>${d} ${new Date(y,m).toLocaleString('en-GB',{month:'short'})}:</b><br>${staff.length ? staff.join('<br>') : 'No shifts scheduled'}`;
+    };
 
-    async function selectShift(cId) {
-        if(!state.rota[currentWeekKey]) state.rota[currentWeekKey] = {};
-        state.rota[currentWeekKey][activeEdit.sId][activeEdit.dIdx] = cId;
-        closePicker();
-        renderWeekly();
-        await sync();
-    }
-
-    // --- Screenshots ---
+    // --- Screenshot Mode ---
     window.openSS = (type) => {
         const cont = document.getElementById('ss-content');
-        let html = "";
         if(type === 'week') {
-            const wk = currentWeekKey;
-            html = `<div class="ss-title">Retail Rota: Week ${wk}</div><table class="ss-table"><tr><th>Staff</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr>`;
+            let h = `<h2>Week: ${currentWeekKey}</h2><table class="ss-table"><tr><th>Staff</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr>`;
             state.staff.forEach(s => {
-                const row = state.rota[wk][s.id] || Array(7).fill('off');
-                let total = calculateTotal(wk, s.id);
-                html += `<tr><td><b>${s.name}</b></td>${row.map(cId => `<td>${state.codes.find(x=>x.id===cId).label}</td>`).join('')}<td><b>${total}</b></td></tr>`;
+                let t = 0;
+                h += `<tr><td><b>${s.name}</b></td>${state.rota[currentWeekKey][s.id].map(cId => {
+                    const c = state.codes.find(x=>x.id===cId); t+=c.hrs; return `<td>${c.label}</td>`;
+                }).join('')}<td><b>${t}</b></td></tr>`;
             });
-            html += `</table>`;
+            cont.innerHTML = h + "</table>";
         } else {
             const [y, m] = document.getElementById('month-sel').value.split('-').map(Number);
-            html = `<div class="ss-title">${new Date(y,m).toLocaleString('en-GB',{month:'long', year:'numeric'})}</div>`;
-            const lastDate = new Date(y, m + 1, 0).getDate();
-            for(let d=1; d<=lastDate; d++) {
-                const dt = new Date(y, m, d);
-                const wkKey = getMondayKey(dt);
-                const dIdx = (dt.getDay() + 6) % 7;
+            let h = `<h2>${new Date(y,m).toLocaleString('en-GB',{month:'long',year:'numeric'})}</h2><table class="ss-table"><tr><th>Date</th><th>Staff Working</th></tr>`;
+            for(let d=1; d<=new Date(y,m+1,0).getDate(); d++){
+                const dt = new Date(y,m,d);
+                const wk = getMonKey(dt);
+                const dIdx = (dt.getDay()+6)%7;
                 let wrks = [];
                 state.staff.forEach(s => {
-                    const cId = (state.rota[wkKey] && state.rota[wkKey][s.id]) ? state.rota[wkKey][s.id][dIdx] : 'off';
+                    const cId = (state.rota[wk] && state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
                     const c = state.codes.find(x=>x.id===cId);
-                    if(c && c.hrs > 0) wrks.push(`${s.name} (${c.label})`);
+                    if(c.hrs > 0) wrks.push(`${s.name}(${c.label})`);
                 });
-                if(wrks.length) html += `<div style="padding:5px; border-bottom:1px solid #eee; font-size:12px"><b>${d} ${DAYS[dIdx]}:</b> ${wrks.join(', ')}</div>`;
+                if(wrks.length) h += `<tr><td><b>${d} ${DAYS[dIdx]}</b></td><td style="text-align:left">${wrks.join(', ')}</td></tr>`;
             }
+            cont.innerHTML = h + "</table>";
         }
-        cont.innerHTML = html;
         document.getElementById('ss-overlay').style.display = 'block';
-    }
+    };
 
     window.closeSS = () => document.getElementById('ss-overlay').style.display = 'none';
 
-    // --- Management ---
-    window.addStaff = async () => {
-        const n = document.getElementById('new-staff-name').value;
-        if(!n) return;
-        state.staff.push({id: Date.now(), name: n});
-        document.getElementById('new-staff-name').value = "";
-        renderSettings(); await sync();
+    // --- Picker & Logic ---
+    window.openPicker = (sId, dIdx) => {
+        activeEdit = {sId, dIdx};
+        const cont = document.getElementById('picker-btns');
+        cont.innerHTML = state.codes.map(c => `<button class="btn-large" style="background:#fff;color:#000" onclick="setShift('${c.id}')">${c.label}</button>`).join('') + `<button class="btn-large" style="background:gray" onclick="closePicker()">Cancel</button>`;
+        document.getElementById('picker-overlay').style.display = 'flex';
     };
-
-    window.addCode = async () => {
-        const l = document.getElementById('new-code-label').value;
-        const h = parseFloat(document.getElementById('new-code-hrs').value);
-        if(!l) return;
-        state.codes.push({id: 'c'+Date.now(), label: l, hrs: h || 0});
-        document.getElementById('new-code-label').value = "";
-        document.getElementById('new-code-hrs').value = "";
-        renderSettings(); await sync();
+    window.closePicker = () => document.getElementById('picker-overlay').style.display = 'none';
+    window.setShift = async (cId) => {
+        state.rota[currentWeekKey][activeEdit.sId][activeEdit.dIdx] = cId;
+        closePicker(); renderWeekly(); await sync();
     };
+    window.changeWeek = (v) => { currentWeekKey = v; renderWeekly(); };
+    window.logout = () => { localStorage.removeItem('rota_v7_auth'); location.reload(); };
 
-    function renderSettings() {
-        const sList = document.getElementById('staff-manage-list');
-        sList.innerHTML = "";
-        state.staff.forEach(s => {
-            sList.innerHTML += `<div class="day-row"><span>${s.name}</span><span style="color:red" onclick="removeStaff(${s.id})">Remove</span></div>`;
-        });
-        const cList = document.getElementById('codes-manage-list');
-        cList.innerHTML = "";
-        state.codes.forEach(c => {
-            if(c.id === 'off') return;
-            cList.innerHTML += `<div class="day-row"><span>${c.label} (${c.hrs}h)</span><span style="color:red" onclick="removeCode('${c.id}')">✕</span></div>`;
-        });
-    }
-
-    window.removeStaff = async (id) => { state.staff = state.staff.filter(x => x.id !== id); renderSettings(); await sync(); };
-    window.removeCode = async (id) => { state.codes = state.codes.filter(x => x.id !== id); renderSettings(); await sync(); };
-
-    // Init
-    startApp();
+    init();
 </script>
-
 </body>
 </html>

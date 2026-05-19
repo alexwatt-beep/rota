@@ -52,7 +52,7 @@
         .day-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--ios-bg); }
         .shift-badge { background: var(--ios-bg); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; min-width: 85px; text-align: center; }
 
-        /* Calendar Grid (Updated for Scaling) */
+        /* Calendar Grid */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--ios-border); border: 1px solid var(--ios-border); border-radius: 10px; overflow: hidden; }
         .cal-head { background: #f8f8f8; padding: 8px 0; text-align: center; font-size: 10px; font-weight: bold; color: var(--ios-gray); }
         .cal-day { background: #fff; min-height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 4px 2px; font-size: 13px; font-weight: 600; position: relative; }
@@ -73,7 +73,7 @@
         .ss-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .ss-table th, .ss-table td { border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 11px; }
 
-        /* Navigation (Fixed for Safe Area) */
+        /* Navigation */
         .bottom-nav { 
             position: fixed; 
             bottom: 0; 
@@ -120,7 +120,7 @@
 </header>
 
 <div id="app" class="content hidden">
-    <!-- Weekly -->
+    <!-- Weekly View -->
     <section id="tab-weekly">
         <button class="btn-large" style="background:var(--success)" onclick="openSS('week')">📸 Weekly Screenshot</button>
         <div class="card">
@@ -130,7 +130,7 @@
         <div id="weekly-container"></div>
     </section>
 
-    <!-- Monthly -->
+    <!-- Monthly View -->
     <section id="tab-monthly" class="hidden">
         <button class="btn-large" style="background:var(--success)" onclick="openSS('month')">📸 Monthly Screenshot</button>
         <div class="card">
@@ -142,7 +142,7 @@
         </div>
     </section>
 
-    <!-- Settings -->
+    <!-- Settings View -->
     <section id="tab-settings" class="hidden">
         <div class="card">
             <h3>Staff Members</h3>
@@ -225,7 +225,7 @@
     let currentWeekKey = "";
     let activeEdit = { sId: null, dIdx: null };
 
-    // --- Core Logic ---
+    // --- Date Engine ---
     function getMonKey(d) {
         const date = new Date(d);
         date.setUTCHours(0, 0, 0, 0);
@@ -282,7 +282,7 @@
         if(t==='monthly') renderMonth(); else if(t==='settings') renderSettings(); else renderWeekly();
     };
 
-    // --- Weekly ---
+    // --- Weekly View ---
     function renderWeekly() {
         const cont = document.getElementById('weekly-container');
         cont.innerHTML = "";
@@ -291,7 +291,6 @@
 
         state.staff.forEach(s => {
             if(!state.rota[wk][s.id]) {
-                // Default Sunday to CLOSED code if it exists, otherwise OFF
                 const closedCode = state.codes.find(c => c.label.toUpperCase() === 'CLOSED');
                 const defaultId = closedCode ? closedCode.id : 'off';
                 state.rota[wk][s.id] = DAYS.map((_, i) => i === 6 ? defaultId : 'off');
@@ -331,7 +330,8 @@
                 state.staff.forEach(s => {
                     const cId = (state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
                     const c = state.codes.find(x=>x.id===cId);
-                    if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF') {
+                    // Filter out OFF and CLOSED labels
+                    if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') {
                         const isHol = c.label.toLowerCase().startsWith('hol');
                         const isAway = c.label.toLowerCase().startsWith('away');
                         badges.push(`<div class="initial-dot ${isHol?'hol-shift':''} ${isAway?'away-shift':''}">${s.initials}</div>`);
@@ -355,12 +355,12 @@
         state.staff.forEach(s => {
             const cId = (state.rota[wk] && state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
             const c = state.codes.find(x=>x.id===cId);
-            if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF') staff.push(`<b>${s.name}:</b> ${c.label}`);
+            if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') staff.push(`<b>${s.name}:</b> ${c.label}`);
         });
         document.getElementById('day-detail').innerHTML = `<b>${d} ${new Date(y,m).toLocaleString('en-GB',{month:'short'})}:</b><br>${staff.length ? staff.join('<br>') : 'No shifts scheduled'}`;
     };
 
-    // --- Settings & Editing ---
+    // --- Settings & Management ---
     function renderSettings() {
         const sList = document.getElementById('staff-manage-list');
         sList.innerHTML = "";
@@ -495,7 +495,8 @@
                     state.staff.forEach(s => {
                         const cId = state.rota[wk][s.id] ? state.rota[wk][s.id][dIdx] : 'off';
                         const c = state.codes.find(x=>x.id===cId);
-                        if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF') {
+                        // Filter out OFF and CLOSED labels for screenshot staff list
+                        if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') {
                             const suffix = c.label.toLowerCase().startsWith('hol') ? " (HOL)" : "";
                             wrks.push(`${s.name}${suffix}`);
                         }

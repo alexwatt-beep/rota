@@ -19,6 +19,7 @@
             --ios-blue: #007aff; --ios-bg: #f2f2f7; --ios-card: #ffffff;
             --ios-text: #000000; --ios-gray: #8e8e93; --ios-border: #c6c6c8;
             --danger: #ff3b30; --success: #34c759; --nav-height: 85px;
+            --hol-color: #ff9500; /* Alternate color for "hol" shifts */
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, system-ui, sans-serif; }
         body { background: var(--ios-bg); color: var(--ios-text); margin: 0; padding-bottom: var(--nav-height); height: 100vh; overflow-x: hidden; }
@@ -51,6 +52,7 @@
 
         .initials-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; margin-top: 4px; width: 100%; padding: 0 2px; }
         .initial-dot { font-size: 8px; background: var(--ios-blue); color: white; padding: 2px; border-radius: 4px; min-width: 14px; text-align: center; font-weight: bold; text-transform: uppercase; }
+        .initial-dot.hol-shift { background: var(--hol-color); }
 
         .day-detail-box { background: var(--ios-blue); color: #fff; padding: 15px; border-radius: 14px; margin-top: 15px; min-height: 60px; }
 
@@ -291,11 +293,19 @@
                 state.staff.forEach(s => {
                     const cId = (state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
                     const c = state.codes.find(x=>x.id===cId);
-                    if(c && c.hrs > 0) staffWorking.push(s.initials || '??');
+                    // Check if it's a working shift or HOL (starts with hol)
+                    if(c && (c.hrs > 0 || c.label.toLowerCase().startsWith('hol')) && c.id !== 'off') {
+                        staffWorking.push({
+                            init: s.initials || '??',
+                            isHol: c.label.toLowerCase().startsWith('hol')
+                        });
+                    }
                 });
             }
 
-            let initialBadges = staffWorking.map(init => `<div class="initial-dot">${init}</div>`).join('');
+            let initialBadges = staffWorking.map(item => 
+                `<div class="initial-dot ${item.isHol ? 'hol-shift' : ''}">${item.init}</div>`
+            ).join('');
             grid.innerHTML += `<div class="cal-day" onclick="showDayDetails(${y},${m},${d}, this)">${d}<div class="initials-container">${initialBadges}</div></div>`;
         }
     };
@@ -310,7 +320,7 @@
         state.staff.forEach(s => {
             const cId = (state.rota[wk] && state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
             const c = state.codes.find(x=>x.id===cId);
-            if(c && c.hrs > 0) staff.push(`<b>${s.name}:</b> ${c.label}`);
+            if(c && (c.hrs > 0 || c.label.toLowerCase().startsWith('hol')) && c.id !== 'off') staff.push(`<b>${s.name}:</b> ${c.label}`);
         });
         document.getElementById('day-detail').innerHTML = `<b>${d} ${new Date(y,m).toLocaleString('en-GB',{month:'short'})}:</b><br>${staff.length ? staff.join('<br>') : 'No shifts scheduled'}`;
     };
@@ -394,7 +404,7 @@
                     state.staff.forEach(s => {
                         const cId = state.rota[wk][s.id] ? state.rota[wk][s.id][dIdx] : 'off';
                         const c = state.codes.find(x=>x.id===cId);
-                        if(c && c.hrs > 0) wrks.push(s.initials || '??');
+                        if(c && (c.hrs > 0 || c.label.toLowerCase().startsWith('hol')) && c.id !== 'off') wrks.push(s.initials || '??');
                     });
                 }
                 if(wrks.length) h += `<tr><td><b>${d} ${DAYS[dIdx]}</b></td><td style="text-align:left">${wrks.join(', ')}</td></tr>`;

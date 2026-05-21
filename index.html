@@ -1,3 +1,8 @@
+<!-- 
+  PROJECT: Creative Cove Rotas
+  VERSION: 2.0 (Annual Leave Tracking)
+  FEATURES: Firebase Sync, Financial Year Leave Logic (April-March), 5-Week Entitlement Calc, Mobile Optimized
+-->
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -7,7 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <meta name="apple-mobile-web-app-title" content="Creative Cove Rotas">
-    <title>Creative Cove Rotas</title>
+    <title>Creative Cove Rotas v2.0</title>
     
     <link rel="apple-touch-icon" href="icon.png">
 
@@ -40,145 +45,81 @@
             --away-text: #8e8e93;
         }
 
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; }
+        body { background: var(--ios-bg); color: var(--slate); margin: 0; padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 20px); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-        body { 
-            background: var(--ios-bg); 
-            color: var(--slate); 
-            margin: 0; 
-            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 20px); 
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-        }
+        /* --- LOGIN --- */
+        #login-screen { position: fixed; inset: 0; background: url('bg.jpg') no-repeat center center; background-size: cover; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        #login-screen::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.2); z-index: -1; }
+        .login-card { background: rgba(255, 255, 255, 0.95); width: 100%; max-width: 340px; padding: 40px 30px; border-radius: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; backdrop-filter: blur(10px); }
+        .login-logo { width: 70px; height: 70px; background: var(--slate); border-radius: 50%; margin: 0 auto 30px; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
+        input { width: 100%; padding: 16px; border: 1.5px solid #ddd; border-radius: 14px; font-size: 16px; margin-bottom: 12px; outline: none; background: white; }
 
-        /* --- CLEAN LOGIN WITH BACKGROUND IMAGE --- */
-        #login-screen { 
-            position: fixed; inset: 0; 
-            background: url('bg.jpg') no-repeat center center;
-            background-size: cover;
-            z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; 
-        }
-        .login-card { 
-            background: rgba(255, 255, 255, 0.95); 
-            width: 100%; max-width: 340px; padding: 30px; 
-            border-radius: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
-            text-align: center;
-            backdrop-filter: blur(10px);
-        }
-        input { 
-            width: 100%; padding: 16px; border: 1.5px solid #ddd; border-radius: 14px; 
-            font-size: 16px; margin-bottom: 12px; outline: none; background: white;
-        }
-
-        /* Nav Glassmorphism */
-        header { 
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            padding: 20px; 
-            padding-top: calc(15px + var(--safe-top)); 
-            border-bottom: 0.5px solid var(--ios-border); 
-            position: sticky; top: 0; z-index: 100;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        header h1 { margin: 0; font-size: 20px; font-weight: 800; color: var(--slate); }
-
-        .sync-indicator {
-            display: flex; align-items: center; gap: 6px; font-size: 10px; 
-            font-weight: 700; color: var(--forest); text-transform: uppercase;
-        }
+        /* --- NAVIGATION --- */
+        header { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(25px) saturate(180%); padding: 20px; padding-top: calc(15px + var(--safe-top)); border-bottom: 0.5px solid var(--ios-border); position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { margin: 0; font-size: 18px; font-weight: 800; color: var(--slate); }
+        .sync-indicator { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; color: var(--forest); text-transform: uppercase; }
         .pulse-dot { width: 8px; height: 8px; background: var(--forest); border-radius: 50%; animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 148, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 184, 148, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 148, 0); }
-        }
+        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 148, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 184, 148, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 184, 148, 0); } }
 
-        .bottom-nav { 
-            position: fixed; bottom: 0; width: 100%; 
-            height: calc(var(--nav-height) + var(--safe-bottom)); 
-            background: rgba(255,255,255,0.85); 
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-top: 0.5px solid var(--ios-border); 
-            display: flex; justify-content: space-around; 
-            padding-top: 12px; padding-bottom: var(--safe-bottom); z-index: 1000; 
-        }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--ios-gray); font-size: 10px; font-weight: 600; text-decoration: none; flex: 1; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: calc(var(--nav-height) + var(--safe-bottom)); background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border-top: 0.5px solid var(--ios-border); display: flex; justify-content: space-around; padding-top: 12px; padding-bottom: var(--safe-bottom); z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--ios-gray); font-size: 9px; font-weight: 700; text-decoration: none; flex: 1; transition: color 0.2s; }
         .nav-item.active { color: var(--ios-blue); }
-        .nav-item svg { width: 24px; height: 24px; margin-bottom: 4px; }
+        .nav-item svg { width: 22px; height: 22px; margin-bottom: 4px; }
 
-        /* UI */
+        /* --- UI COMPONENTS --- */
         .content { padding: 15px; }
         .card { background: var(--ios-card); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .btn-large { width: 100%; padding: 18px; background: var(--ios-blue); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-sm { padding: 8px 12px; font-size: 12px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; }
+        .btn-sm { padding: 8px 12px; font-size: 11px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; }
 
-        /* Weekly View */
-        .staff-header { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 19px; border-bottom: 1px solid var(--ios-bg); padding-bottom: 12px; margin-bottom: 12px; }
+        /* --- STAFF CARDS --- */
+        .staff-header { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 18px; border-bottom: 1px solid var(--ios-bg); padding-bottom: 12px; margin-bottom: 12px; }
         .staff-info { display: flex; align-items: center; gap: 10px; }
         .staff-avatar-circle { width: 36px; height: 36px; background: var(--ios-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .staff-total-badge { background: var(--mint); color: var(--forest); padding: 4px 12px; border-radius: 20px; font-size: 14px; font-family: "SF Mono", monospace; }
+        .staff-total-badge { background: var(--mint); color: var(--forest); padding: 4px 12px; border-radius: 20px; font-size: 14px; font-family: monospace; }
         .day-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 0.5px solid var(--ios-bg); }
-        .day-label { color: var(--slate-light); font-weight: 600; font-size: 14px; text-transform: uppercase; }
         .shift-badge { background: var(--ios-bg); padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 13px; min-width: 95px; text-align: center; }
 
-        /* Avatar Picker */
-        .avatar-grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 10px; 
-            margin-bottom: 15px; 
-            max-height: 220px; 
-            overflow-y: auto; 
-            padding: 5px;
-            background: var(--ios-bg);
-            border-radius: 14px;
-        }
-        .avatar-option { padding: 12px; background: white; border-radius: 12px; text-align: center; font-size: 24px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
-        .avatar-option.selected { border-color: var(--ios-blue); transform: scale(1.05); }
+        /* --- LEAVE DASHBOARD --- */
+        .leave-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .leave-stat { padding: 12px; background: var(--ios-bg); border-radius: 14px; text-align: center; }
+        .leave-stat-val { display: block; font-size: 20px; font-weight: 800; color: var(--slate); }
+        .leave-stat-lbl { display: block; font-size: 9px; font-weight: 700; color: var(--slate-light); text-transform: uppercase; margin-top: 2px; }
+        .leave-stat.primary { background: var(--mint); }
+        .leave-stat.primary .leave-stat-val { color: var(--forest); }
 
-        /* Month Grid */
+        /* --- MONTH GRID --- */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #ddd; border: 1.5px solid var(--ios-border); border-radius: 16px; overflow: hidden; }
         .cal-head { background: #f8f8f8; padding: 10px 0; text-align: center; font-size: 10px; font-weight: 800; color: var(--ios-gray); text-transform: uppercase; }
         .cal-day { background: #fff; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 6px 2px; font-size: 13px; font-weight: 700; position: relative; }
-        .cal-day.empty { background: #f9f9fb; }
-        .cal-day.active { background: var(--ios-blue); color: white; z-index: 2; }
-        .cal-day.is-bh { background: #fff5f5; }
-        .bh-dot { position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; background: var(--danger); border-radius: 50%; }
         .cal-day.day-closed { background-image: repeating-linear-gradient(45deg, #f2f2f7, #f2f2f7 5px, #ffffff 5px, #ffffff 10px); color: #ccc; }
-
         .initials-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; margin-top: 6px; width: 100%; }
-        .initial-dot { font-size: 9px; background: var(--slate); color: white; padding: 3px; border-radius: 6px; min-width: 18px; text-align: center; font-weight: 800; text-transform: uppercase; }
+        .initial-dot { font-size: 9px; background: var(--slate); color: white; padding: 3px; border-radius: 6px; min-width: 18px; text-align: center; font-weight: 800; }
         .initial-dot.hol-shift { background: var(--warning); color: #856404; }
-        .initial-dot.away-shift { background: var(--away-color); color: var(--away-text); }
 
-        .day-detail-box { background: var(--ios-blue); color: #fff; padding: 15px; border-radius: 14px; margin-top: 15px; min-height: 60px; }
-
-        /* Screenshot Overlay */
+        /* --- SCREENSHOT --- */
         #ss-overlay { position: fixed; inset: 0; background: white; z-index: 9000; display: none; overflow-y: auto; padding: 25px; padding-top: calc(25px + var(--safe-top)); color: var(--slate); }
         .ss-branding { border-bottom: 2px solid var(--slate); padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
-        .ss-branding h2 { margin: 0; font-family: "Georgia", serif; font-size: 26px; }
         .ss-table { width: 100%; border-collapse: collapse; }
-        .ss-table th { background: var(--slate); color: white; padding: 10px; font-size: 11px; text-transform: uppercase; }
+        .ss-table th { background: var(--slate); color: white; padding: 10px; font-size: 11px; }
         .ss-table td { border-bottom: 1px solid #eee; padding: 10px; text-align: center; font-size: 12px; }
-        .ss-table tr:nth-child(even) { background: #f9f9f9; }
 
-        /* Picker */
+        .hidden { display: none !important; }
+        .avatar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; max-height: 150px; overflow-y: auto; padding: 10px; background: var(--ios-bg); border-radius: 14px; margin-bottom: 10px; }
+        .avatar-option { padding: 10px; background: white; border-radius: 10px; text-align: center; font-size: 20px; cursor: pointer; border: 2px solid transparent; }
+        .avatar-option.selected { border-color: var(--ios-blue); }
+
         #picker-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 8000; display: none; flex-direction: column; justify-content: flex-end; }
         .picker-sheet { background: var(--ios-bg); border-radius: 28px 28px 0 0; padding: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-height: 80vh; overflow-y: auto; padding-bottom: calc(30px + var(--safe-bottom)); }
         .picker-btn { background: white; border: none; padding: 18px; border-radius: 16px; font-size: 15px; font-weight: 700; color: var(--slate); }
-
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <div id="login-screen">
     <div class="login-card">
+        <div class="login-logo">🕒</div>
         <input type="text" id="user-in" placeholder="Username">
         <input type="password" id="pass-in" placeholder="Password">
         <button class="btn-large" onclick="doLogin()">Login</button>
@@ -192,83 +133,80 @@
 </div>
 
 <header id="header" class="hidden">
-    <h1 id="view-title">Weekly Rota</h1>
+    <h1 id="header-title">Creative Cove Rotas</h1>
     <div class="sync-indicator"><div class="pulse-dot"></div>Cloud Sync</div>
 </header>
 
 <div id="app" class="content hidden">
-    <!-- Weekly -->
+    <!-- Tab: Weekly -->
     <section id="tab-weekly">
-        <button class="btn-large" style="background:var(--forest)" onclick="openSS('week')">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            Weekly Screenshot
-        </button>
+        <button class="btn-large" style="background:var(--forest)" onclick="openSS('week')">📸 Weekly Screenshot</button>
         <div class="card">
-            <label style="font-size:10px; color:var(--ios-gray); font-weight: 800; text-transform: uppercase;">Planning Week</label>
-            <select id="week-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; outline:none; color:var(--ios-blue);"></select>
+            <select id="week-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; color:var(--ios-blue);"></select>
         </div>
         <div id="weekly-container"></div>
     </section>
 
-    <!-- Monthly -->
+    <!-- Tab: Monthly -->
     <section id="tab-monthly" class="hidden">
-        <button class="btn-large" style="background:var(--forest)" onclick="openSS('month')">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            Monthly Screenshot
-        </button>
+        <button class="btn-large" style="background:var(--forest)" onclick="openSS('month')">📸 Monthly Screenshot</button>
         <div class="card">
-            <select id="month-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; color:var(--ios-blue); outline:none;"></select>
+            <select id="month-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; color:var(--ios-blue);"></select>
         </div>
         <div class="cal-grid" id="cal-grid-body"></div>
-        <div id="day-detail" class="day-detail-box">
-            <div style="opacity:0.8; font-size:13px; font-weight: 600;">Tap a date to view coverage...</div>
-        </div>
+        <div id="day-detail" class="day-detail-box"><div style="opacity:0.8; font-size:13px;">Tap a date to view coverage...</div></div>
     </section>
 
-    <!-- Settings -->
+    <!-- Tab: Leave -->
+    <section id="tab-leave" class="hidden">
+        <div class="card" style="background: var(--mint); text-align: center;">
+            <h2 id="leave-year-title" style="margin:0; color: var(--forest);">Financial Year 2026/27</h2>
+            <p style="font-size: 11px; margin: 5px 0 0; opacity: 0.7;">Calculated as 5 weeks of contractual hours</p>
+        </div>
+        <div id="leave-container"></div>
+    </section>
+
+    <!-- Tab: Settings -->
     <section id="tab-settings" class="hidden">
         <div class="card" id="staff-form-card">
             <h3 id="staff-form-title">Team Management</h3>
             <div id="staff-manage-list" style="margin-bottom: 15px;"></div>
-            
             <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-                <label style="font-size: 11px; font-weight: 800; color: var(--slate-light);">AVATAR SELECTION</label>
                 <div class="avatar-grid" id="avatar-picker"></div>
+                <input type="text" id="new-staff-name" placeholder="Full Name">
                 <div style="display:flex; gap:10px;">
-                    <input type="text" id="new-staff-name" placeholder="Full Name">
-                    <input type="text" id="new-staff-init" placeholder="Init" maxlength="2" style="width:70px">
+                    <input type="text" id="new-staff-init" placeholder="Init" maxlength="2">
+                    <input type="number" id="new-staff-contract" placeholder="Weekly Contract Hrs" style="width:100%">
                 </div>
             </div>
-            <button class="btn-large" id="add-staff-btn" onclick="addStaff()">Add New Member</button>
-            <button class="btn-large hidden" id="cancel-staff-btn" style="background:var(--slate-light)" onclick="cancelStaffEdit()">Cancel Edit</button>
+            <button class="btn-large" id="add-staff-btn" onclick="addStaff()">Add Member</button>
+            <button class="btn-large hidden" id="cancel-staff-btn" style="background:var(--slate-light)" onclick="cancelStaffEdit()">Cancel</button>
         </div>
 
         <div class="card">
-            <h3>Shift Definitions</h3>
+            <h3>Shift Codes</h3>
             <div id="codes-manage-list"></div>
-            <div style="display:flex; gap:10px; margin-top: 15px;">
-                <input type="text" id="new-code-label" placeholder="e.g. 9-5">
-                <input type="number" id="new-code-hrs" placeholder="Hrs" style="width:75px">
+            <div style="display:flex; gap:10px; margin-top: 10px;">
+                <input type="text" id="new-code-label" placeholder="Code (9-5)">
+                <input type="number" id="new-code-hrs" placeholder="Hrs" style="width:80px">
             </div>
-            <button class="btn-large" style="background:var(--slate-light); margin-top:5px" onclick="addCode()">Create Shift Code</button>
+            <button class="btn-large" style="background:var(--slate-light)" onclick="addCode()">Create Code</button>
         </div>
 
         <div class="card">
-            <h3>Offline Security</h3>
-            <button class="btn-large" style="background:var(--forest); margin-bottom:10px" onclick="exportData()">💾 Backup to JSON</button>
+            <button class="btn-large" style="background:var(--forest); margin-bottom:10px" onclick="exportData()">💾 Backup JSON</button>
             <input type="file" id="import-file" style="font-size:12px; margin-bottom:10px">
             <button class="btn-large" style="background:var(--slate-light)" onclick="importData()">📥 Restore Backup</button>
         </div>
-
         <button class="btn-large" style="background:var(--danger)" onclick="logout()">Sign Out</button>
     </section>
 </div>
 
-<!-- Navigation Bar -->
 <nav id="nav" class="bottom-nav hidden">
-    <div class="nav-item active" onclick="switchTab('weekly', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Weekly</span></div>
-    <div class="nav-item" onclick="switchTab('monthly', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg><span>Monthly</span></div>
-    <div class="nav-item" onclick="switchTab('settings', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span>Settings</span></div>
+    <div class="nav-item active" onclick="switchTab('weekly', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Weekly</span></div>
+    <div class="nav-item" onclick="switchTab('monthly', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Monthly</span></div>
+    <div class="nav-item" onclick="switchTab('leave', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.122a5 5 0 010-7.072m7.072 0a5 5 0 010 7.072M12 13V7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Leave</span></div>
+    <div class="nav-item" onclick="switchTab('settings', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Settings</span></div>
 </nav>
 
 <div id="picker-overlay" onclick="closePicker()"><div class="picker-sheet" id="picker-btns" onclick="event.stopPropagation()"></div></div>
@@ -290,17 +228,15 @@
     const db = getFirestore(app);
 
     let state = {
-        staff: [{id: 1, name: "Sandra", initials: "SA", avatar: "🌸"}],
+        staff: [{id: 1, name: "Sandra", initials: "SA", avatar: "🌸", contractHours: 16}],
         codes: [{id:'off', label:'OFF', hrs:0}, {id:'closed', label:'CLOSED', hrs:0}],
         rota: {}
     };
 
-    const AVATARS = ["👤", "🦉", "🦅", "🦜", "🦢", "🕊️", "🐧", "🐦", "🐤", "🦆", "🦩", "🦚", "🐓", "🐥", "🐦‍⬛", "🐦‍🔥", "🌸", "🌺", "🌻", "🌼", "🌷", "🌹", "🪻", "🪷", "🥀", "💐", "🌵", "🌿", "🪴", "🍄", "🍀", "🍁", "🍂", "🍃", "🎋", "🎍"];
+    const AVATARS = ["👤", "🦉", "🦅", "🦜", "🦢", "🕊️", "🐧", "🐦", "🐤", "🦆", "🦩", "🦚", "🐓", "🐥", "🌸", "🌺", "🌻", "🌼", "🌷", "🌹", "🪻", "🪷", "🥀", "🌵", "🌿", "🪴", "🍄", "🍀", "🍁", "🍂", "🍃", "🎋"];
     let selectedAvatar = "👤";
     let editingStaffId = null;
-
     const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const BH = ['2026-08-31','2026-12-25','2026-12-28','2027-01-01','2027-03-26','2027-03-29','2027-05-03','2027-05-31','2027-08-30','2027-12-27','2027-12-28'];
     let currentWeekKey = "";
     let activeEdit = { sId: null, dIdx: null };
 
@@ -326,8 +262,15 @@
         setupSelectors();
         renderAvatarPicker();
         onSnapshot(doc(db, "rotaData", "global"), (s) => {
-            if(s.exists()){ state = s.data(); renderWeekly(); if(window.currentTab==='monthly') renderMonth(); if(window.currentTab==='settings') renderSettings(); }
+            if(s.exists()){ state = s.data(); refreshUI(); }
         });
+    }
+
+    function refreshUI() {
+        renderWeekly();
+        if(window.currentTab==='monthly') renderMonth();
+        if(window.currentTab==='leave') renderLeave();
+        if(window.currentTab==='settings') renderSettings();
     }
 
     async function sync() { await setDoc(doc(db, "rotaData", "global"), state); }
@@ -345,7 +288,7 @@
         wS.onchange = (e) => { currentWeekKey = e.target.value; renderWeekly(); };
 
         const mS = document.getElementById('month-sel');
-        for(let i=-2; i<18; i++){
+        for(let i=-2; i<12; i++){
             let d = new Date(); d.setMonth(d.getMonth()+i);
             mS.add(new Option(d.toLocaleDateString('en-GB',{month:'long',year:'numeric'}), `${d.getFullYear()}-${d.getMonth()}`));
         }
@@ -359,10 +302,68 @@
         document.getElementById('tab-'+t).classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        document.getElementById('view-title').innerText = t.charAt(0).toUpperCase() + t.slice(1) + " View";
-        if(t==='monthly') renderMonth(); else if(t==='settings') renderSettings(); else renderWeekly();
+        if(t==='monthly') renderMonth(); else if(t==='leave') renderLeave(); else if(t==='settings') renderSettings(); else renderWeekly();
     };
 
+    // --- LEAVE TRACKING LOGIC ---
+    function renderLeave() {
+        const cont = document.getElementById('leave-container');
+        cont.innerHTML = "";
+        
+        // Determine Financial Year
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        let fyStart = new Date(currentYear, 3, 1); // April 1st
+        if (now < fyStart) fyStart = new Date(currentYear - 1, 3, 1);
+        const fyEnd = new Date(fyStart.getFullYear() + 1, 2, 31, 23, 59, 59); // March 31st
+        
+        document.getElementById('leave-year-title').innerText = `FY ${fyStart.getFullYear()}/${(fyStart.getFullYear()+1).toString().slice(-2)}`;
+
+        state.staff.forEach(s => {
+            const contract = s.contractHours || 0;
+            const totalEntitlement = contract * 5;
+            let used = 0;
+            let scheduled = 0;
+
+            // Iterate through all rota data
+            Object.keys(state.rota).forEach(weekCommencing => {
+                const monDate = new Date(weekCommencing);
+                for(let i=0; i<7; i++) {
+                    const d = new Date(monDate);
+                    d.setDate(monDate.getDate() + i);
+                    
+                    if (d >= fyStart && d <= fyEnd) {
+                        const shiftId = state.rota[weekCommencing][s.id] ? state.rota[weekCommencing][s.id][i] : 'off';
+                        const code = state.codes.find(c => c.id === shiftId);
+                        
+                        if (code && code.label.toLowerCase().startsWith('hol') && code.hrs > 0) {
+                            if (d < new Date().setHours(0,0,0,0)) used += code.hrs;
+                            else scheduled += code.hrs;
+                        }
+                    }
+                }
+            });
+
+            const unassigned = totalEntitlement - (used + scheduled);
+
+            cont.innerHTML += `
+                <div class="card">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                        <div class="staff-avatar-circle">${s.avatar || '👤'}</div>
+                        <div style="font-weight:800">${s.name} <span style="font-weight:400; font-size:12px; opacity:0.6">(${contract}h contract)</span></div>
+                    </div>
+                    <div class="leave-grid">
+                        <div class="leave-stat primary"><span class="leave-stat-val">${totalEntitlement}</span><span class="leave-stat-lbl">Total</span></div>
+                        <div class="leave-stat"><span class="leave-stat-val">${used}</span><span class="leave-stat-lbl">Used</span></div>
+                        <div class="leave-stat"><span class="leave-stat-val">${scheduled}</span><span class="leave-stat-lbl">Scheduled</span></div>
+                        <div class="leave-stat" style="background:#fff3cd"><span class="leave-stat-val">${unassigned}</span><span class="leave-stat-lbl">Unassigned</span></div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // --- STANDARD ROTA LOGIC ---
     function renderWeekly() {
         const cont = document.getElementById('weekly-container');
         cont.innerHTML = "";
@@ -372,15 +373,14 @@
         state.staff.forEach(s => {
             if(!state.rota[wk][s.id]) {
                 const closedCode = state.codes.find(c => c.label.toUpperCase() === 'CLOSED');
-                const defaultId = closedCode ? closedCode.id : 'off';
-                state.rota[wk][s.id] = DAYS.map((_, i) => i === 6 ? defaultId : 'off');
+                state.rota[wk][s.id] = Array(7).fill('off').map((v, i) => i === 6 ? (closedCode ? closedCode.id : 'off') : v);
             }
             let total = 0;
             let rows = '';
             state.rota[wk][s.id].forEach((cId, i) => {
                 const c = state.codes.find(x => x.id===cId) || state.codes[0];
                 total += c.hrs || 0;
-                rows += `<div class="day-row" onclick="openPicker(${s.id},${i})"><span class="day-label">${DAYS[i]}</span><div class="shift-badge">${c.label}</div></div>`;
+                rows += `<div class="day-row" onclick="openPicker(${s.id},${i})"><span style="font-weight:600; font-size:14px; color:var(--slate-light)">${DAYS[i]}</span><div class="shift-badge">${c.label}</div></div>`;
             });
             cont.innerHTML += `<div class="card"><div class="staff-header"><div class="staff-info"><div class="staff-avatar-circle">${s.avatar || '👤'}</div><span>${s.name}</span></div><span class="staff-total-badge">${total.toFixed(1)}h</span></div>${rows}</div>`;
         });
@@ -398,38 +398,34 @@
             const iso = date.toISOString().split('T')[0];
             const wk = getMonKey(date);
             const dIdx = (date.getDay() + 6) % 7;
-            const isBH = BH.includes(iso);
             let isClosed = false;
             let badges = [];
             if(state.rota[wk]) {
                 state.staff.forEach(s => {
-                    const cId = (state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
+                    const cId = state.rota[wk][s.id] ? state.rota[wk][s.id][dIdx] : 'off';
                     const c = state.codes.find(x=>x.id===cId);
                     if (c && c.label.toUpperCase() === 'CLOSED') isClosed = true;
                     if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') {
-                        const isHol = c.label.toLowerCase().startsWith('hol');
-                        const isAway = c.label.toLowerCase().startsWith('away');
-                        badges.push(`<div class="initial-dot ${isHol?'hol-shift':''} ${isAway?'away-shift':''}">${s.initials}</div>`);
+                        badges.push(`<div class="initial-dot ${c.label.toLowerCase().startsWith('hol')?'hol-shift':''}">${s.initials}</div>`);
                     }
                 });
             }
-            grid.innerHTML += `<div class="cal-day ${isBH?'is-bh':''} ${isClosed?'day-closed':''}" onclick="showDayDetails(${y},${m},${d}, this)">${d}${isBH?'<div class="bh-dot"></div>':''}<div class="initials-container">${badges.join('')}</div></div>`;
+            grid.innerHTML += `<div class="cal-day ${BH.includes(iso)?'is-bh':''} ${isClosed?'day-closed':''}" onclick="showDayDetails(${y},${m},${d}, this)">${d}${BH.includes(iso)?'<div class="bh-dot"></div>':''}<div class="initials-container">${badges.join('')}</div></div>`;
         }
     }
 
     window.showDayDetails = (y,m,d, el) => {
         document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('active'));
         el.classList.add('active');
-        const date = new Date(y, m, d);
-        const wk = getMonKey(date);
-        const dIdx = (date.getDay() + 6) % 7;
+        const wk = getMonKey(new Date(y, m, d));
+        const dIdx = (new Date(y, m, d).getDay() + 6) % 7;
         let staff = [];
         state.staff.forEach(s => {
             const cId = (state.rota[wk] && state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
             const c = state.codes.find(x=>x.id===cId);
             if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') staff.push(`${s.avatar || '👤'} <b>${s.name}:</b> ${c.label}`);
         });
-        document.getElementById('day-detail').innerHTML = `<b>${d} ${new Date(y,m).toLocaleString('en-GB',{month:'short'})}:</b><br>${staff.length ? staff.join('<br>') : 'Shop is closed or no staff set'}`;
+        document.getElementById('day-detail').innerHTML = `<b>${d} ${new Date(y,m).toLocaleString('en-GB',{month:'short'})}:</b><br>${staff.length ? staff.join('<br>') : 'Closed / No shifts'}`;
     };
 
     function renderAvatarPicker() {
@@ -446,7 +442,7 @@
         const sList = document.getElementById('staff-manage-list');
         sList.innerHTML = "";
         state.staff.forEach(s => {
-            sList.innerHTML += `<div class="day-row"><div style="display:flex; align-items:center; gap:8px;"><div class="staff-avatar-circle" style="width:24px; height:24px; font-size:14px;">${s.avatar || '👤'}</div><span><b>${s.name}</b> (${s.initials})</span></div><div><button class="btn-sm" style="background:var(--ios-blue); color:white" onclick="editStaff(${s.id})">Edit</button><button class="btn-sm" style="background:var(--danger); color:white" onclick="removeStaff(${s.id})">Del</button></div></div>`;
+            sList.innerHTML += `<div class="day-row"><div style="display:flex; align-items:center; gap:8px;"><div class="staff-avatar-circle" style="width:24px; height:24px; font-size:14px;">${s.avatar || '👤'}</div><span><b>${s.name}</b> (${s.initials}) - ${s.contractHours || 0}h</span></div><div><button class="btn-sm" style="background:var(--ios-blue); color:white" onclick="editStaff(${s.id})">Edit</button><button class="btn-sm" style="background:var(--danger); color:white" onclick="removeStaff(${s.id})">Del</button></div></div>`;
         });
         const cList = document.getElementById('codes-manage-list');
         cList.innerHTML = "";
@@ -459,15 +455,16 @@
     window.addStaff = async () => {
         const n = document.getElementById('new-staff-name').value;
         const i = document.getElementById('new-staff-init').value;
-        if(!n || !i) return alert("Missing name or initials");
+        const c = parseFloat(document.getElementById('new-staff-contract').value) || 0;
+        if(!n || !i) return alert("Missing data");
         if (editingStaffId) {
-            const index = state.staff.findIndex(x => x.id === editingStaffId);
-            state.staff[index].name = n; state.staff[index].initials = i.toUpperCase(); state.staff[index].avatar = selectedAvatar;
+            const idx = state.staff.findIndex(x => x.id === editingStaffId);
+            state.staff[idx] = {...state.staff[idx], name: n, initials: i.toUpperCase(), avatar: selectedAvatar, contractHours: c};
             cancelStaffEdit();
         } else {
-            state.staff.push({id: Date.now(), name: n, initials: i.toUpperCase(), avatar: selectedAvatar});
+            state.staff.push({id: Date.now(), name: n, initials: i.toUpperCase(), avatar: selectedAvatar, contractHours: c});
         }
-        document.getElementById('new-staff-name').value = ""; document.getElementById('new-staff-init').value = "";
+        document.getElementById('new-staff-name').value = ""; document.getElementById('new-staff-init').value = ""; document.getElementById('new-staff-contract').value = "";
         await sync();
     };
 
@@ -476,6 +473,7 @@
         editingStaffId = id;
         document.getElementById('new-staff-name').value = s.name;
         document.getElementById('new-staff-init').value = s.initials;
+        document.getElementById('new-staff-contract').value = s.contractHours || 0;
         selectAvatar(s.avatar || "👤");
         document.getElementById('add-staff-btn').innerText = "Update Staff Member";
         document.getElementById('cancel-staff-btn').classList.remove('hidden');
@@ -484,7 +482,7 @@
 
     window.cancelStaffEdit = () => {
         editingStaffId = null;
-        document.getElementById('new-staff-name').value = ""; document.getElementById('new-staff-init').value = "";
+        document.getElementById('new-staff-name').value = ""; document.getElementById('new-staff-init').value = ""; document.getElementById('new-staff-contract').value = "";
         document.getElementById('add-staff-btn').innerText = "Add New Member";
         document.getElementById('cancel-staff-btn').classList.add('hidden');
         selectAvatar("👤");
@@ -501,12 +499,12 @@
 
     window.editCode = async (id) => {
         const c = state.codes.find(x => x.id === id);
-        const nLab = prompt("Update Label:", c.label); const nHrs = prompt("Update Hours:", c.hrs);
-        if(nLab && nHrs !== null) { c.label = nLab; c.hrs = parseFloat(nHrs); await sync(); }
+        const nl = prompt("Label:", c.label); const nh = prompt("Hours:", c.hrs);
+        if(nl && nh !== null) { c.label = nl; c.hrs = parseFloat(nh); await sync(); }
     };
 
-    window.removeStaff = async (id) => { if(confirm('Delete staff?')) { state.staff = state.staff.filter(x => x.id !== id); await sync(); } };
-    window.removeCode = async (id) => { if(confirm('Delete code?')) { state.codes = state.codes.filter(x => x.id !== id); await sync(); } };
+    window.removeStaff = async (id) => { if(confirm('Delete?')) { state.staff = state.staff.filter(x => x.id !== id); await sync(); } };
+    window.removeCode = async (id) => { if(confirm('Delete?')) { state.codes = state.codes.filter(x => x.id !== id); await sync(); } };
 
     window.openPicker = (sId, dIdx) => {
         activeEdit = {sId, dIdx};
@@ -516,27 +514,25 @@
     };
     window.closePicker = () => document.getElementById('picker-overlay').style.display = 'none';
     window.setShift = async (cId) => {
-        if(!state.rota[currentWeekKey]) state.rota[currentWeekKey] = {};
-        if(!state.rota[currentWeekKey][activeEdit.sId]) state.rota[currentWeekKey][activeEdit.sId] = Array(7).fill('off');
-        state.rota[currentWeekKey][activeEdit.sId][activeEdit.dIdx] = cId;
+        const wk = document.getElementById('week-sel').value;
+        if(!state.rota[wk]) state.rota[wk] = {};
+        if(!state.rota[wk][activeEdit.sId]) state.rota[wk][activeEdit.sId] = Array(7).fill('off');
+        state.rota[wk][activeEdit.sId][activeEdit.dIdx] = cId;
         closePicker(); renderWeekly(); await sync();
     };
     window.logout = () => { localStorage.removeItem('rota_v10_auth'); location.reload(); };
 
     window.exportData = () => {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
-        const dlAnchor = document.createElement('a');
-        dlAnchor.setAttribute("href", dataStr); dlAnchor.setAttribute("download", `rota_backup_${new Date().toISOString().split('T')[0]}.json`);
-        dlAnchor.click();
+        const blob = new Blob([JSON.stringify(state)], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `backup_${new Date().toISOString().split('T')[0]}.json`; a.click();
     };
 
     window.importData = () => {
         const file = document.getElementById('import-file').files[0];
-        if(!file) return alert("Select a file first");
+        if(!file) return;
         const reader = new FileReader();
-        reader.onload = async (e) => {
-            try { state = JSON.parse(e.target.result); await sync(); location.reload(); } catch (err) { alert("Invalid JSON file"); }
-        };
+        reader.onload = async (e) => { state = JSON.parse(e.target.result); await sync(); location.reload(); };
         reader.readAsText(file);
     };
 
@@ -544,25 +540,26 @@
         const cont = document.getElementById('ss-content');
         const branding = `<div class="ss-branding"><h2>Creative Cove Rotas</h2><p>${new Date().toLocaleDateString('en-GB')}</p></div>`;
         if(type === 'week') {
-            let h = branding + `<h3>Week: ${currentWeekKey}</h3><table class="ss-table"><tr><th>Staff</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr>`;
+            const wk = document.getElementById('week-sel').value;
+            let h = branding + `<h3>Week: ${wk}</h3><table class="ss-table"><tr><th>Staff</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr>`;
             state.staff.forEach(s => {
-                const row = (state.rota[currentWeekKey] && state.rota[currentWeekKey][s.id]) ? state.rota[currentWeekKey][s.id] : Array(7).fill('off');
+                const row = (state.rota[wk] && state.rota[wk][s.id]) ? state.rota[wk][s.id] : Array(7).fill('off');
                 let t = 0;
-                h += `<tr><td><b>${s.avatar !== '👤' ? s.avatar : ''} ${s.name}</b></td>${row.map(cId => { const c = state.codes.find(x=>x.id===cId); t+=(c?c.hrs:0); return `<td>${c?c.label:''}</td>`; }).join('')}<td><b>${t.toFixed(1)}</b></td></tr>`;
+                h += `<tr><td><b>${s.avatar || ''} ${s.name}</b></td>${row.map(cId => { const c = state.codes.find(x=>x.id===cId); t+=(c?c.hrs:0); return `<td>${c?c.label:''}</td>`; }).join('')}<td><b>${t.toFixed(1)}</b></td></tr>`;
             });
             cont.innerHTML = h + "</table>";
         } else {
             const [y, m] = document.getElementById('month-sel').value.split('-').map(Number);
             let h = branding + `<h3>${new Date(y,m).toLocaleString('en-GB',{month:'long',year:'numeric'})}</h3><table class="ss-table"><tr><th>Date</th><th>Staff Working</th></tr>`;
-            for(let d=1; d<=new Date(y,m+1,0).getDate(); d++){
+            const last = new Date(y, m+1, 0).getDate();
+            for(let d=1; d<=last; d++){
                 const dt = new Date(y,m,d); const wk = getMonKey(dt); const dIdx = (dt.getDay()+6)%7; let wrks = [];
                 if(state.rota[wk]) {
                     state.staff.forEach(s => {
                         const cId = state.rota[wk][s.id] ? state.rota[wk][s.id][dIdx] : 'off';
                         const c = state.codes.find(x=>x.id===cId);
                         if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED' && !c.label.toLowerCase().startsWith('away')) {
-                            const suffix = c.label.toLowerCase().startsWith('hol') ? " (HOL)" : "";
-                            wrks.push(`${s.avatar !== '👤' ? s.avatar : ''} ${s.name}${suffix}`);
+                            wrks.push(`${s.avatar || ''} ${s.name}${c.label.toLowerCase().startsWith('hol')?' (HOL)':''}`);
                         }
                     });
                 }

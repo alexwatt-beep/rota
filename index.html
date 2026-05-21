@@ -1,7 +1,7 @@
 <!-- 
   PROJECT: Creative Cove Rotas
-  VERSION: 2.0 (Annual Leave Tracking)
-  FEATURES: Firebase Sync, Financial Year Leave Logic (April-March), 5-Week Entitlement Calc, Mobile Optimized
+  VERSION: 2.1 (Stability Fix - Monthly View)
+  FEATURES: Firebase Sync, Annual Leave (Apr-Mar), Avatars, DST-Safe Calendar
 -->
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <meta name="apple-mobile-web-app-title" content="Creative Cove Rotas">
-    <title>Creative Cove Rotas v2.0</title>
+    <title>Creative Cove Rotas v2.1</title>
     
     <link rel="apple-touch-icon" href="icon.png">
 
@@ -73,7 +73,7 @@
         .btn-large { width: 100%; padding: 18px; background: var(--ios-blue); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-sm { padding: 8px 12px; font-size: 11px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; }
 
-        /* --- STAFF CARDS --- */
+        /* --- STAFF / ROTA --- */
         .staff-header { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 18px; border-bottom: 1px solid var(--ios-bg); padding-bottom: 12px; margin-bottom: 12px; }
         .staff-info { display: flex; align-items: center; gap: 10px; }
         .staff-avatar-circle { width: 36px; height: 36px; background: var(--ios-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
@@ -81,15 +81,13 @@
         .day-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 0.5px solid var(--ios-bg); }
         .shift-badge { background: var(--ios-bg); padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 13px; min-width: 95px; text-align: center; }
 
-        /* --- LEAVE DASHBOARD --- */
+        /* --- LEAVE --- */
         .leave-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .leave-stat { padding: 12px; background: var(--ios-bg); border-radius: 14px; text-align: center; }
         .leave-stat-val { display: block; font-size: 20px; font-weight: 800; color: var(--slate); }
         .leave-stat-lbl { display: block; font-size: 9px; font-weight: 700; color: var(--slate-light); text-transform: uppercase; margin-top: 2px; }
-        .leave-stat.primary { background: var(--mint); }
-        .leave-stat.primary .leave-stat-val { color: var(--forest); }
 
-        /* --- MONTH GRID --- */
+        /* --- CALENDAR --- */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #ddd; border: 1.5px solid var(--ios-border); border-radius: 16px; overflow: hidden; }
         .cal-head { background: #f8f8f8; padding: 10px 0; text-align: center; font-size: 10px; font-weight: 800; color: var(--ios-gray); text-transform: uppercase; }
         .cal-day { background: #fff; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 6px 2px; font-size: 13px; font-weight: 700; position: relative; }
@@ -97,19 +95,20 @@
         .initials-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; margin-top: 6px; width: 100%; }
         .initial-dot { font-size: 9px; background: var(--slate); color: white; padding: 3px; border-radius: 6px; min-width: 18px; text-align: center; font-weight: 800; }
         .initial-dot.hol-shift { background: var(--warning); color: #856404; }
+        .initial-dot.away-shift { background: var(--away-color); color: var(--away-text); }
+        .bh-dot { position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; background: var(--danger); border-radius: 50%; }
+        .day-detail-box { background: var(--ios-blue); color: #fff; padding: 15px; border-radius: 14px; margin-top: 15px; min-height: 60px; }
 
-        /* --- SCREENSHOT --- */
+        /* --- UTILS --- */
         #ss-overlay { position: fixed; inset: 0; background: white; z-index: 9000; display: none; overflow-y: auto; padding: 25px; padding-top: calc(25px + var(--safe-top)); color: var(--slate); }
         .ss-branding { border-bottom: 2px solid var(--slate); padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
         .ss-table { width: 100%; border-collapse: collapse; }
         .ss-table th { background: var(--slate); color: white; padding: 10px; font-size: 11px; }
         .ss-table td { border-bottom: 1px solid #eee; padding: 10px; text-align: center; font-size: 12px; }
-
         .hidden { display: none !important; }
         .avatar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; max-height: 150px; overflow-y: auto; padding: 10px; background: var(--ios-bg); border-radius: 14px; margin-bottom: 10px; }
         .avatar-option { padding: 10px; background: white; border-radius: 10px; text-align: center; font-size: 20px; cursor: pointer; border: 2px solid transparent; }
         .avatar-option.selected { border-color: var(--ios-blue); }
-
         #picker-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 8000; display: none; flex-direction: column; justify-content: flex-end; }
         .picker-sheet { background: var(--ios-bg); border-radius: 28px 28px 0 0; padding: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-height: 80vh; overflow-y: auto; padding-bottom: calc(30px + var(--safe-bottom)); }
         .picker-btn { background: white; border: none; padding: 18px; border-radius: 16px; font-size: 15px; font-weight: 700; color: var(--slate); }
@@ -128,7 +127,7 @@
 </div>
 
 <div id="ss-overlay">
-    <button class="btn-large" style="background:#000" onclick="closeSS()">✕ Exit Screenshot Mode</button>
+    <button class="btn-large" style="background:#000" onclick="closeSS()">✕ Close Screenshot Mode</button>
     <div id="ss-content"></div>
 </div>
 
@@ -138,35 +137,31 @@
 </header>
 
 <div id="app" class="content hidden">
-    <!-- Tab: Weekly -->
+    <!-- WEEKLY -->
     <section id="tab-weekly">
         <button class="btn-large" style="background:var(--forest)" onclick="openSS('week')">📸 Weekly Screenshot</button>
-        <div class="card">
-            <select id="week-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; color:var(--ios-blue);"></select>
-        </div>
+        <div class="card"><select id="week-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; color:var(--ios-blue);"></select></div>
         <div id="weekly-container"></div>
     </section>
 
-    <!-- Tab: Monthly -->
+    <!-- MONTHLY -->
     <section id="tab-monthly" class="hidden">
         <button class="btn-large" style="background:var(--forest)" onclick="openSS('month')">📸 Monthly Screenshot</button>
-        <div class="card">
-            <select id="month-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; color:var(--ios-blue);"></select>
-        </div>
+        <div class="card"><select id="month-sel" style="width:100%; border:none; font-size:18px; font-weight:800; background:none; color:var(--ios-blue);"></select></div>
         <div class="cal-grid" id="cal-grid-body"></div>
         <div id="day-detail" class="day-detail-box"><div style="opacity:0.8; font-size:13px;">Tap a date to view coverage...</div></div>
     </section>
 
-    <!-- Tab: Leave -->
+    <!-- LEAVE -->
     <section id="tab-leave" class="hidden">
         <div class="card" style="background: var(--mint); text-align: center;">
-            <h2 id="leave-year-title" style="margin:0; color: var(--forest);">Financial Year 2026/27</h2>
-            <p style="font-size: 11px; margin: 5px 0 0; opacity: 0.7;">Calculated as 5 weeks of contractual hours</p>
+            <h2 id="leave-year-title" style="margin:0; color: var(--forest);">FY 2026/27</h2>
+            <p style="font-size: 11px; margin: 5px 0 0; opacity: 0.7;">Annual Leave Tracking (April - March)</p>
         </div>
         <div id="leave-container"></div>
     </section>
 
-    <!-- Tab: Settings -->
+    <!-- SETTINGS -->
     <section id="tab-settings" class="hidden">
         <div class="card" id="staff-form-card">
             <h3 id="staff-form-title">Team Management</h3>
@@ -176,23 +171,20 @@
                 <input type="text" id="new-staff-name" placeholder="Full Name">
                 <div style="display:flex; gap:10px;">
                     <input type="text" id="new-staff-init" placeholder="Init" maxlength="2">
-                    <input type="number" id="new-staff-contract" placeholder="Weekly Contract Hrs" style="width:100%">
+                    <input type="number" id="new-staff-contract" placeholder="Contract Hrs" style="width:100%">
                 </div>
             </div>
             <button class="btn-large" id="add-staff-btn" onclick="addStaff()">Add Member</button>
             <button class="btn-large hidden" id="cancel-staff-btn" style="background:var(--slate-light)" onclick="cancelStaffEdit()">Cancel</button>
         </div>
-
         <div class="card">
             <h3>Shift Codes</h3>
             <div id="codes-manage-list"></div>
             <div style="display:flex; gap:10px; margin-top: 10px;">
-                <input type="text" id="new-code-label" placeholder="Code (9-5)">
-                <input type="number" id="new-code-hrs" placeholder="Hrs" style="width:80px">
+                <input type="text" id="new-code-label" placeholder="Code"><input type="number" id="new-code-hrs" placeholder="Hrs" style="width:80px">
             </div>
             <button class="btn-large" style="background:var(--slate-light)" onclick="addCode()">Create Code</button>
         </div>
-
         <div class="card">
             <button class="btn-large" style="background:var(--forest); margin-bottom:10px" onclick="exportData()">💾 Backup JSON</button>
             <input type="file" id="import-file" style="font-size:12px; margin-bottom:10px">
@@ -206,7 +198,7 @@
     <div class="nav-item active" onclick="switchTab('weekly', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Weekly</span></div>
     <div class="nav-item" onclick="switchTab('monthly', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Monthly</span></div>
     <div class="nav-item" onclick="switchTab('leave', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.122a5 5 0 010-7.072m7.072 0a5 5 0 010 7.072M12 13V7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Leave</span></div>
-    <div class="nav-item" onclick="switchTab('settings', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Settings</span></div>
+    <div class="nav-item" onclick="switchTab('settings', this)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Settings</span></div>
 </nav>
 
 <div id="picker-overlay" onclick="closePicker()"><div class="picker-sheet" id="picker-btns" onclick="event.stopPropagation()"></div></div>
@@ -237,9 +229,11 @@
     let selectedAvatar = "👤";
     let editingStaffId = null;
     const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const BH = ['2026-08-31','2026-12-25','2026-12-28','2027-01-01','2027-03-26','2027-03-29','2027-05-03','2027-05-31','2027-08-30','2027-12-27','2027-12-28'];
     let currentWeekKey = "";
     let activeEdit = { sId: null, dIdx: null };
 
+    // --- FIX: DST Safe Monday Key ---
     function getMonKey(d) {
         const date = new Date(d);
         date.setHours(12, 0, 0, 0); 
@@ -289,8 +283,8 @@
 
         const mS = document.getElementById('month-sel');
         for(let i=-2; i<12; i++){
-            let d = new Date(); d.setMonth(d.getMonth()+i);
-            mS.add(new Option(d.toLocaleDateString('en-GB',{month:'long',year:'numeric'}), `${d.getFullYear()}-${d.getMonth()}`));
+            let mD = new Date(); mD.setMonth(mD.getMonth()+i);
+            mS.add(new Option(mD.toLocaleDateString('en-GB',{month:'long',year:'numeric'}), `${mD.getFullYear()}-${mD.getMonth()}`));
         }
         mS.value = `${new Date().getFullYear()}-${new Date().getMonth()}`;
         mS.onchange = () => renderMonth();
@@ -305,84 +299,46 @@
         if(t==='monthly') renderMonth(); else if(t==='leave') renderLeave(); else if(t==='settings') renderSettings(); else renderWeekly();
     };
 
-    // --- LEAVE TRACKING LOGIC ---
     function renderLeave() {
-        const cont = document.getElementById('leave-container');
-        cont.innerHTML = "";
-        
-        // Determine Financial Year
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        let fyStart = new Date(currentYear, 3, 1); // April 1st
-        if (now < fyStart) fyStart = new Date(currentYear - 1, 3, 1);
-        const fyEnd = new Date(fyStart.getFullYear() + 1, 2, 31, 23, 59, 59); // March 31st
-        
+        const cont = document.getElementById('leave-container'); cont.innerHTML = "";
+        const now = new Date(); const curY = now.getFullYear();
+        let fyStart = new Date(curY, 3, 1); if (now < fyStart) fyStart = new Date(curY - 1, 3, 1);
+        const fyEnd = new Date(fyStart.getFullYear() + 1, 2, 31, 23, 59, 59);
         document.getElementById('leave-year-title').innerText = `FY ${fyStart.getFullYear()}/${(fyStart.getFullYear()+1).toString().slice(-2)}`;
 
         state.staff.forEach(s => {
-            const contract = s.contractHours || 0;
-            const totalEntitlement = contract * 5;
-            let used = 0;
-            let scheduled = 0;
-
-            // Iterate through all rota data
-            Object.keys(state.rota).forEach(weekCommencing => {
-                const monDate = new Date(weekCommencing);
+            const ent = (s.contractHours || 0) * 5; let used = 0, sched = 0;
+            Object.keys(state.rota).forEach(wk => {
+                const mon = new Date(wk);
                 for(let i=0; i<7; i++) {
-                    const d = new Date(monDate);
-                    d.setDate(monDate.getDate() + i);
-                    
+                    const d = new Date(mon); d.setDate(mon.getDate()+i); d.setHours(12,0,0,0);
                     if (d >= fyStart && d <= fyEnd) {
-                        const shiftId = state.rota[weekCommencing][s.id] ? state.rota[weekCommencing][s.id][i] : 'off';
-                        const code = state.codes.find(c => c.id === shiftId);
-                        
-                        if (code && code.label.toLowerCase().startsWith('hol') && code.hrs > 0) {
-                            if (d < new Date().setHours(0,0,0,0)) used += code.hrs;
-                            else scheduled += code.hrs;
+                        const cId = state.rota[wk][s.id] ? state.rota[wk][s.id][i] : 'off';
+                        const c = state.codes.find(x => x.id === cId);
+                        if (c && c.label.toLowerCase().startsWith('hol') && c.hrs > 0) {
+                            if (d < new Date().setHours(0,0,0,0)) used += c.hrs; else sched += c.hrs;
                         }
                     }
                 }
             });
-
-            const unassigned = totalEntitlement - (used + scheduled);
-
-            cont.innerHTML += `
-                <div class="card">
-                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                        <div class="staff-avatar-circle">${s.avatar || '👤'}</div>
-                        <div style="font-weight:800">${s.name} <span style="font-weight:400; font-size:12px; opacity:0.6">(${contract}h contract)</span></div>
-                    </div>
-                    <div class="leave-grid">
-                        <div class="leave-stat primary"><span class="leave-stat-val">${totalEntitlement}</span><span class="leave-stat-lbl">Total</span></div>
-                        <div class="leave-stat"><span class="leave-stat-val">${used}</span><span class="leave-stat-lbl">Used</span></div>
-                        <div class="leave-stat"><span class="leave-stat-val">${scheduled}</span><span class="leave-stat-lbl">Scheduled</span></div>
-                        <div class="leave-stat" style="background:#fff3cd"><span class="leave-stat-val">${unassigned}</span><span class="leave-stat-lbl">Unassigned</span></div>
-                    </div>
-                </div>
-            `;
+            cont.innerHTML += `<div class="card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><div class="staff-avatar-circle">${s.avatar||'👤'}</div><div style="font-weight:800">${s.name} <span style="font-weight:400;font-size:12px;opacity:0.6">(${s.contractHours||0}h)</span></div></div><div class="leave-grid"><div class="leave-stat" style="background:var(--mint)"><span class="leave-stat-val" style="color:var(--forest)">${ent}</span><span class="leave-stat-lbl">Total</span></div><div class="leave-stat"><span class="leave-stat-val">${used}</span><span class="leave-stat-lbl">Used</span></div><div class="leave-stat"><span class="leave-stat-val">${sched}</span><span class="leave-stat-lbl">Sched</span></div><div class="leave-stat" style="background:#fff3cd"><span class="leave-stat-val">${ent-(used+sched)}</span><span class="leave-stat-lbl">Unassigned</span></div></div></div>`;
         });
     }
 
-    // --- STANDARD ROTA LOGIC ---
     function renderWeekly() {
-        const cont = document.getElementById('weekly-container');
-        cont.innerHTML = "";
-        const wk = currentWeekKey;
-        if(!state.rota[wk]) state.rota[wk] = {};
-
+        const cont = document.getElementById('weekly-container'); cont.innerHTML = "";
+        const wk = currentWeekKey; if(!state.rota[wk]) state.rota[wk] = {};
         state.staff.forEach(s => {
             if(!state.rota[wk][s.id]) {
-                const closedCode = state.codes.find(c => c.label.toUpperCase() === 'CLOSED');
-                state.rota[wk][s.id] = Array(7).fill('off').map((v, i) => i === 6 ? (closedCode ? closedCode.id : 'off') : v);
+                const cl = state.codes.find(c => c.label.toUpperCase() === 'CLOSED');
+                state.rota[wk][s.id] = Array(7).fill('off').map((v, i) => i === 6 ? (cl ? cl.id : 'off') : v);
             }
-            let total = 0;
-            let rows = '';
+            let tot = 0, rows = '';
             state.rota[wk][s.id].forEach((cId, i) => {
-                const c = state.codes.find(x => x.id===cId) || state.codes[0];
-                total += c.hrs || 0;
-                rows += `<div class="day-row" onclick="openPicker(${s.id},${i})"><span style="font-weight:600; font-size:14px; color:var(--slate-light)">${DAYS[i]}</span><div class="shift-badge">${c.label}</div></div>`;
+                const c = state.codes.find(x => x.id===cId) || state.codes[0]; tot += c.hrs || 0;
+                rows += `<div class="day-row" onclick="openPicker(${s.id},${i})"><span class="day-label" style="font-size:13px; color:var(--slate-light); font-weight:700;">${DAYS[i]}</span><div class="shift-badge">${c.label}</div></div>`;
             });
-            cont.innerHTML += `<div class="card"><div class="staff-header"><div class="staff-info"><div class="staff-avatar-circle">${s.avatar || '👤'}</div><span>${s.name}</span></div><span class="staff-total-badge">${total.toFixed(1)}h</span></div>${rows}</div>`;
+            cont.innerHTML += `<div class="card"><div class="staff-header"><div class="staff-info"><div class="staff-avatar-circle">${s.avatar||'👤'}</div><span>${s.name}</span></div><span class="staff-total-badge">${tot.toFixed(1)}h</span></div>${rows}</div>`;
         });
     }
 
@@ -394,175 +350,96 @@
         let startPad = new Date(y, m, 1).getDay() - 1; if(startPad === -1) startPad = 6;
         for(let i=0; i<startPad; i++) grid.innerHTML += `<div class="cal-day empty"></div>`;
         for(let d=1; d<=last; d++){
-            const date = new Date(y, m, d);
+            const date = new Date(y, m, d); date.setHours(12,0,0,0);
             const iso = date.toISOString().split('T')[0];
             const wk = getMonKey(date);
             const dIdx = (date.getDay() + 6) % 7;
-            let isClosed = false;
-            let badges = [];
+            let isCl = false, badges = [];
             if(state.rota[wk]) {
                 state.staff.forEach(s => {
-                    const cId = state.rota[wk][s.id] ? state.rota[wk][s.id][dIdx] : 'off';
+                    const cId = (state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
                     const c = state.codes.find(x=>x.id===cId);
-                    if (c && c.label.toUpperCase() === 'CLOSED') isClosed = true;
+                    if (c && c.label.toUpperCase() === 'CLOSED') isCl = true;
                     if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') {
-                        badges.push(`<div class="initial-dot ${c.label.toLowerCase().startsWith('hol')?'hol-shift':''}">${s.initials}</div>`);
+                        badges.push(`<div class="initial-dot ${c.label.toLowerCase().startsWith('hol')?'hol-shift':''} ${c.label.toLowerCase().startsWith('away')?'away-shift':''}">${s.initials}</div>`);
                     }
                 });
             }
-            grid.innerHTML += `<div class="cal-day ${BH.includes(iso)?'is-bh':''} ${isClosed?'day-closed':''}" onclick="showDayDetails(${y},${m},${d}, this)">${d}${BH.includes(iso)?'<div class="bh-dot"></div>':''}<div class="initials-container">${badges.join('')}</div></div>`;
+            grid.innerHTML += `<div class="cal-day ${BH.includes(iso)?'is-bh':''} ${isCl?'day-closed':''}" onclick="showDayDetails(${y},${m},${d}, this)">${d}${BH.includes(iso)?'<div class="bh-dot"></div>':''}<div class="initials-container">${badges.join('')}</div></div>`;
         }
     }
 
     window.showDayDetails = (y,m,d, el) => {
-        document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('active'));
-        el.classList.add('active');
-        const wk = getMonKey(new Date(y, m, d));
-        const dIdx = (new Date(y, m, d).getDay() + 6) % 7;
-        let staff = [];
+        document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('active')); el.classList.add('active');
+        const dt = new Date(y,m,d); dt.setHours(12,0,0,0);
+        const wk = getMonKey(dt); const dIdx = (dt.getDay() + 6) % 7;
+        let stf = [];
         state.staff.forEach(s => {
             const cId = (state.rota[wk] && state.rota[wk][s.id]) ? state.rota[wk][s.id][dIdx] : 'off';
             const c = state.codes.find(x=>x.id===cId);
-            if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') staff.push(`${s.avatar || '👤'} <b>${s.name}:</b> ${c.label}`);
+            if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED') stf.push(`${s.avatar||'👤'} <b>${s.name}:</b> ${c.label}`);
         });
-        document.getElementById('day-detail').innerHTML = `<b>${d} ${new Date(y,m).toLocaleString('en-GB',{month:'short'})}:</b><br>${staff.length ? staff.join('<br>') : 'Closed / No shifts'}`;
+        document.getElementById('day-detail').innerHTML = `<b>${d} ${new Date(y,m).toLocaleString('en-GB',{month:'short'})}:</b><br>${stf.length ? stf.join('<br>') : 'Closed / No shifts'}`;
     };
 
     function renderAvatarPicker() {
-        const picker = document.getElementById('avatar-picker');
-        picker.innerHTML = AVATARS.map(a => `<div class="avatar-option ${a === selectedAvatar ? 'selected' : ''}" id="av-${a}" onclick="selectAvatar('${a}')">${a}</div>`).join('');
+        document.getElementById('avatar-picker').innerHTML = AVATARS.map(a => `<div class="avatar-option ${a === selectedAvatar ? 'selected' : ''}" id="av-${a}" onclick="selectAvatar('${a}')">${a}</div>`).join('');
     }
-    window.selectAvatar = (a) => {
-        selectedAvatar = a;
-        document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
-        const el = document.getElementById('av-'+a); if(el) el.classList.add('selected');
-    }
+    window.selectAvatar = (a) => { selectedAvatar = a; document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected')); const el = document.getElementById('av-'+a); if(el) el.classList.add('selected'); }
 
     function renderSettings() {
-        const sList = document.getElementById('staff-manage-list');
-        sList.innerHTML = "";
+        const sL = document.getElementById('staff-manage-list'); sL.innerHTML = "";
         state.staff.forEach(s => {
-            sList.innerHTML += `<div class="day-row"><div style="display:flex; align-items:center; gap:8px;"><div class="staff-avatar-circle" style="width:24px; height:24px; font-size:14px;">${s.avatar || '👤'}</div><span><b>${s.name}</b> (${s.initials}) - ${s.contractHours || 0}h</span></div><div><button class="btn-sm" style="background:var(--ios-blue); color:white" onclick="editStaff(${s.id})">Edit</button><button class="btn-sm" style="background:var(--danger); color:white" onclick="removeStaff(${s.id})">Del</button></div></div>`;
+            sL.innerHTML += `<div class="day-row"><div style="display:flex;align-items:center;gap:8px;"><div class="staff-avatar-circle" style="width:24px;height:24px;font-size:14px;">${s.avatar||'👤'}</div><span><b>${s.name}</b> (${s.initials})</span></div><div><button class="btn-sm" style="background:var(--ios-blue);color:white" onclick="editStaff(${s.id})">Edit</button><button class="btn-sm" style="background:var(--danger);color:white" onclick="removeStaff(${s.id})">Del</button></div></div>`;
         });
-        const cList = document.getElementById('codes-manage-list');
-        cList.innerHTML = "";
+        const cL = document.getElementById('codes-manage-list'); cL.innerHTML = "";
         state.codes.forEach(c => {
             if(c.id === 'off') return;
-            cList.innerHTML += `<div class="day-row"><span><b>${c.label}</b> (${c.hrs}h)</span><div><button class="btn-sm" style="background:var(--ios-blue); color:white" onclick="editCode('${c.id}')">Edit</button><button class="btn-sm" style="background:var(--danger); color:white" onclick="removeCode('${c.id}')">Del</button></div></div>`;
+            cL.innerHTML += `<div class="day-row"><span><b>${c.label}</b> (${c.hrs}h)</span><div><button class="btn-sm" style="background:var(--ios-blue);color:white" onclick="editCode('${c.id}')">Edit</button><button class="btn-sm" style="background:var(--danger);color:white" onclick="removeCode('${c.id}')">Del</button></div></div>`;
         });
     }
 
     window.addStaff = async () => {
-        const n = document.getElementById('new-staff-name').value;
-        const i = document.getElementById('new-staff-init').value;
-        const c = parseFloat(document.getElementById('new-staff-contract').value) || 0;
+        const n = document.getElementById('new-staff-name').value, i = document.getElementById('new-staff-init').value, c = parseFloat(document.getElementById('new-staff-contract').value) || 0;
         if(!n || !i) return alert("Missing data");
         if (editingStaffId) {
             const idx = state.staff.findIndex(x => x.id === editingStaffId);
             state.staff[idx] = {...state.staff[idx], name: n, initials: i.toUpperCase(), avatar: selectedAvatar, contractHours: c};
             cancelStaffEdit();
-        } else {
-            state.staff.push({id: Date.now(), name: n, initials: i.toUpperCase(), avatar: selectedAvatar, contractHours: c});
-        }
-        document.getElementById('new-staff-name').value = ""; document.getElementById('new-staff-init').value = ""; document.getElementById('new-staff-contract').value = "";
-        await sync();
+        } else state.staff.push({id: Date.now(), name: n, initials: i.toUpperCase(), avatar: selectedAvatar, contractHours: c});
+        document.getElementById('new-staff-name').value = ""; document.getElementById('new-staff-init').value = ""; document.getElementById('new-staff-contract').value = ""; await sync();
     };
 
     window.editStaff = (id) => {
-        const s = state.staff.find(x => x.id === id);
-        editingStaffId = id;
-        document.getElementById('new-staff-name').value = s.name;
-        document.getElementById('new-staff-init').value = s.initials;
-        document.getElementById('new-staff-contract').value = s.contractHours || 0;
-        selectAvatar(s.avatar || "👤");
-        document.getElementById('add-staff-btn').innerText = "Update Staff Member";
-        document.getElementById('cancel-staff-btn').classList.remove('hidden');
-        document.getElementById('staff-form-card').scrollIntoView({behavior: 'smooth'});
+        const s = state.staff.find(x => x.id === id); editingStaffId = id;
+        document.getElementById('new-staff-name').value = s.name; document.getElementById('new-staff-init').value = s.initials; document.getElementById('new-staff-contract').value = s.contractHours || 0;
+        selectAvatar(s.avatar || "👤"); document.getElementById('add-staff-btn').innerText = "Update Staff Member"; document.getElementById('cancel-staff-btn').classList.remove('hidden'); document.getElementById('staff-form-card').scrollIntoView({behavior: 'smooth'});
     };
 
-    window.cancelStaffEdit = () => {
-        editingStaffId = null;
-        document.getElementById('new-staff-name').value = ""; document.getElementById('new-staff-init').value = ""; document.getElementById('new-staff-contract').value = "";
-        document.getElementById('add-staff-btn').innerText = "Add New Member";
-        document.getElementById('cancel-staff-btn').classList.add('hidden');
-        selectAvatar("👤");
-    };
-
-    window.addCode = async () => {
-        const l = document.getElementById('new-code-label').value;
-        const h = parseFloat(document.getElementById('new-code-hrs').value);
-        if(!l) return;
-        state.codes.push({id: 'c'+Date.now(), label: l, hrs: h || 0});
-        document.getElementById('new-code-label').value = ""; document.getElementById('new-code-hrs').value = "";
-        await sync();
-    };
-
-    window.editCode = async (id) => {
-        const c = state.codes.find(x => x.id === id);
-        const nl = prompt("Label:", c.label); const nh = prompt("Hours:", c.hrs);
-        if(nl && nh !== null) { c.label = nl; c.hrs = parseFloat(nh); await sync(); }
-    };
-
+    window.cancelStaffEdit = () => { editingStaffId = null; document.getElementById('new-staff-name').value = ""; document.getElementById('new-staff-init').value = ""; document.getElementById('new-staff-contract').value = ""; document.getElementById('add-staff-btn').innerText = "Add New Member"; document.getElementById('cancel-staff-btn').classList.add('hidden'); selectAvatar("👤"); };
+    window.addCode = async () => { const l = document.getElementById('new-code-label').value, h = parseFloat(document.getElementById('new-code-hrs').value); if(!l) return; state.codes.push({id: 'c'+Date.now(), label: l, hrs: h || 0}); document.getElementById('new-code-label').value = ""; document.getElementById('new-code-hrs').value = ""; await sync(); };
+    window.editCode = async (id) => { const c = state.codes.find(x => x.id === id), nl = prompt("Label:", c.label), nh = prompt("Hours:", c.hrs); if(nl && nh !== null) { c.label = nl; c.hrs = parseFloat(nh); await sync(); } };
     window.removeStaff = async (id) => { if(confirm('Delete?')) { state.staff = state.staff.filter(x => x.id !== id); await sync(); } };
     window.removeCode = async (id) => { if(confirm('Delete?')) { state.codes = state.codes.filter(x => x.id !== id); await sync(); } };
-
-    window.openPicker = (sId, dIdx) => {
-        activeEdit = {sId, dIdx};
-        const cont = document.getElementById('picker-btns');
-        cont.innerHTML = state.codes.map(c => `<button class="picker-btn" onclick="setShift('${c.id}')">${c.label}</button>`).join('') + `<button class="picker-btn" style="background:#eee" onclick="closePicker()">Cancel</button>`;
-        document.getElementById('picker-overlay').style.display = 'flex';
-    };
+    window.openPicker = (sId, dIdx) => { activeEdit = {sId, dIdx}; const cont = document.getElementById('picker-btns'); cont.innerHTML = state.codes.map(c => `<button class="picker-btn" onclick="setShift('${c.id}')">${c.label}</button>`).join('') + `<button class="picker-btn" style="background:#eee" onclick="closePicker()">Cancel</button>`; document.getElementById('picker-overlay').style.display = 'flex'; };
     window.closePicker = () => document.getElementById('picker-overlay').style.display = 'none';
-    window.setShift = async (cId) => {
-        const wk = document.getElementById('week-sel').value;
-        if(!state.rota[wk]) state.rota[wk] = {};
-        if(!state.rota[wk][activeEdit.sId]) state.rota[wk][activeEdit.sId] = Array(7).fill('off');
-        state.rota[wk][activeEdit.sId][activeEdit.dIdx] = cId;
-        closePicker(); renderWeekly(); await sync();
-    };
+    window.setShift = async (cId) => { const wk = document.getElementById('week-sel').value; if(!state.rota[wk]) state.rota[wk] = {}; if(!state.rota[wk][activeEdit.sId]) state.rota[wk][activeEdit.sId] = Array(7).fill('off'); state.rota[wk][activeEdit.sId][activeEdit.dIdx] = cId; closePicker(); renderWeekly(); await sync(); };
     window.logout = () => { localStorage.removeItem('rota_v10_auth'); location.reload(); };
-
-    window.exportData = () => {
-        const blob = new Blob([JSON.stringify(state)], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `backup_${new Date().toISOString().split('T')[0]}.json`; a.click();
-    };
-
-    window.importData = () => {
-        const file = document.getElementById('import-file').files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = async (e) => { state = JSON.parse(e.target.result); await sync(); location.reload(); };
-        reader.readAsText(file);
-    };
+    window.exportData = () => { const blob = new Blob([JSON.stringify(state)], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); };
+    window.importData = () => { const f = document.getElementById('import-file').files[0]; if(!f) return; const r = new FileReader(); r.onload = async (e) => { state = JSON.parse(e.target.result); await sync(); location.reload(); }; r.readAsText(f); };
 
     window.openSS = (type) => {
-        const cont = document.getElementById('ss-content');
-        const branding = `<div class="ss-branding"><h2>Creative Cove Rotas</h2><p>${new Date().toLocaleDateString('en-GB')}</p></div>`;
+        const cont = document.getElementById('ss-content'); const branding = `<div class="ss-branding"><h2>Creative Cove Rotas</h2><p>${new Date().toLocaleDateString('en-GB')}</p></div>`;
         if(type === 'week') {
-            const wk = document.getElementById('week-sel').value;
-            let h = branding + `<h3>Week: ${wk}</h3><table class="ss-table"><tr><th>Staff</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr>`;
-            state.staff.forEach(s => {
-                const row = (state.rota[wk] && state.rota[wk][s.id]) ? state.rota[wk][s.id] : Array(7).fill('off');
-                let t = 0;
-                h += `<tr><td><b>${s.avatar || ''} ${s.name}</b></td>${row.map(cId => { const c = state.codes.find(x=>x.id===cId); t+=(c?c.hrs:0); return `<td>${c?c.label:''}</td>`; }).join('')}<td><b>${t.toFixed(1)}</b></td></tr>`;
-            });
+            const wk = document.getElementById('week-sel').value; let h = branding + `<h3>Week: ${wk}</h3><table class="ss-table"><tr><th>Staff</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr>`;
+            state.staff.forEach(s => { const row = (state.rota[wk] && state.rota[wk][s.id]) ? state.rota[wk][s.id] : Array(7).fill('off'); let tot = 0; h += `<tr><td><b>${s.avatar||''} ${s.name}</b></td>${row.map(cId => { const c = state.codes.find(x=>x.id===cId); tot+=(c?c.hrs:0); return `<td>${c?c.label:''}</td>`; }).join('')}<td><b>${tot.toFixed(1)}</b></td></tr>`; });
             cont.innerHTML = h + "</table>";
         } else {
-            const [y, m] = document.getElementById('month-sel').value.split('-').map(Number);
-            let h = branding + `<h3>${new Date(y,m).toLocaleString('en-GB',{month:'long',year:'numeric'})}</h3><table class="ss-table"><tr><th>Date</th><th>Staff Working</th></tr>`;
+            const [y, m] = document.getElementById('month-sel').value.split('-').map(Number); let h = branding + `<h3>${new Date(y,m).toLocaleString('en-GB',{month:'long',year:'numeric'})}</h3><table class="ss-table"><tr><th>Date</th><th>Staff Working</th></tr>`;
             const last = new Date(y, m+1, 0).getDate();
             for(let d=1; d<=last; d++){
-                const dt = new Date(y,m,d); const wk = getMonKey(dt); const dIdx = (dt.getDay()+6)%7; let wrks = [];
-                if(state.rota[wk]) {
-                    state.staff.forEach(s => {
-                        const cId = state.rota[wk][s.id] ? state.rota[wk][s.id][dIdx] : 'off';
-                        const c = state.codes.find(x=>x.id===cId);
-                        if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED' && !c.label.toLowerCase().startsWith('away')) {
-                            wrks.push(`${s.avatar || ''} ${s.name}${c.label.toLowerCase().startsWith('hol')?' (HOL)':''}`);
-                        }
-                    });
-                }
+                const dt = new Date(y,m,d); dt.setHours(12,0,0,0); const wk = getMonKey(dt); const dIdx = (dt.getDay()+6)%7; let wrks = [];
+                if(state.rota[wk]) { state.staff.forEach(s => { const cId = state.rota[wk][s.id] ? state.rota[wk][s.id][dIdx] : 'off'; const c = state.codes.find(x=>x.id===cId); if(c && c.id !== 'off' && c.label.toUpperCase() !== 'OFF' && c.label.toUpperCase() !== 'CLOSED' && !c.label.toLowerCase().startsWith('away')) { wrks.push(`${s.avatar||''} ${s.name}${c.label.toLowerCase().startsWith('hol')?' (HOL)':''}`); } }); }
                 if(wrks.length) h += `<tr><td><b>${d} ${DAYS[dIdx]}</b></td><td style="text-align:left">${wrks.join(', ')}</td></tr>`;
             }
             cont.innerHTML = h + "</table>";

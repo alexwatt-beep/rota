@@ -205,7 +205,14 @@
 
 <script type="module">
     import { initializeApp } from "firebase/app";
-    import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
+import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+} from "firebase/auth";
+    
 
     const firebaseConfig = {
         apiKey: "AIzaSyDC0EZhyKmHr7OcPglNlqdcmQu58SHR5Fc",

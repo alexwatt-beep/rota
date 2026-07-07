@@ -20,7 +20,8 @@
     {
       "imports": {
         "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
-        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"
       }
     }
     </script>
@@ -119,7 +120,7 @@
 <div id="login-screen">
     <div class="login-card">
         <div class="login-logo">🕒</div>
-        <input type="text" id="user-in" placeholder="Username">
+        <input type="email" id="user-in" placeholder="Email Address">
         <input type="password" id="pass-in" placeholder="Password">
         <button class="btn-large" onclick="doLogin()">Login</button>
         <p id="l-err" class="hidden" style="color:var(--danger); font-size:14px; margin-top: 15px;">Access Denied</p>
@@ -206,6 +207,12 @@
 <script type="module">
     import { initializeApp } from "firebase/app";
     import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+} from "firebase/auth";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDC0EZhyKmHr7OcPglNlqdcmQu58SHR5Fc",
@@ -218,6 +225,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+  const auth = getAuth(app);
 
     let state = {
         staff: [{id: 1, name: "Sandra", initials: "SA", avatar: "🌸", contractHours: 16}],
@@ -242,12 +250,28 @@
         return new Date(date.setDate(diff)).toISOString().split('T')[0];
     }
 
-    window.doLogin = () => {
-        if(document.getElementById('user-in').value === 'creative' && document.getElementById('pass-in').value === 'uncreative') {
-            localStorage.setItem('rota_v10_auth', 'true');
-            init();
-        } else document.getElementById('l-err').classList.remove('hidden');
-    };
+   window.doLogin = async () => {
+
+    const email = document.getElementById('user-in').value.trim();
+    const password = document.getElementById('pass-in').value;
+
+    try {
+
+        await signInWithEmailAndPassword(auth, email, password);
+
+        localStorage.setItem('rota_v10_auth', 'true');
+
+        init();
+
+    } catch (err) {
+
+        console.error(err);
+
+        document.getElementById('l-err').classList.remove('hidden');
+
+    }
+
+};
 
     function init() {
         if(localStorage.getItem('rota_v10_auth') !== 'true') return;
@@ -424,7 +448,15 @@
     window.openPicker = (sId, dIdx) => { activeEdit = {sId, dIdx}; const cont = document.getElementById('picker-btns'); cont.innerHTML = state.codes.map(c => `<button class="picker-btn" onclick="setShift('${c.id}')">${c.label}</button>`).join('') + `<button class="picker-btn" style="background:#eee" onclick="closePicker()">Cancel</button>`; document.getElementById('picker-overlay').style.display = 'flex'; };
     window.closePicker = () => document.getElementById('picker-overlay').style.display = 'none';
     window.setShift = async (cId) => { const wk = document.getElementById('week-sel').value; if(!state.rota[wk]) state.rota[wk] = {}; if(!state.rota[wk][activeEdit.sId]) state.rota[wk][activeEdit.sId] = Array(7).fill('off'); state.rota[wk][activeEdit.sId][activeEdit.dIdx] = cId; closePicker(); renderWeekly(); await sync(); };
-    window.logout = () => { localStorage.removeItem('rota_v10_auth'); location.reload(); };
+    window.logout = async () => {
+
+    await signOut(auth);
+
+    localStorage.removeItem('rota_v10_auth');
+
+    location.reload();
+
+};
     window.exportData = () => { const blob = new Blob([JSON.stringify(state)], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); };
     window.importData = () => { const f = document.getElementById('import-file').files[0]; if(!f) return; const r = new FileReader(); r.onload = async (e) => { state = JSON.parse(e.target.result); await sync(); location.reload(); }; r.readAsText(f); };
 
@@ -448,7 +480,16 @@
     };
     window.closeSS = () => document.getElementById('ss-overlay').style.display = 'none';
 
-    init();
+    onAuthStateChanged(auth, (user) => {
+
+        if (user) {
+            localStorage.setItem('rota_v10_auth', 'true');
+            init();
+        } else {
+            localStorage.removeItem('rota_v10_auth');
+        }
+
+    });
 </script>
 </body>
 </html>

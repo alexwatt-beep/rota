@@ -218,6 +218,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+  const auth = getAuth(app);
 
     let state = {
         staff: [{id: 1, name: "Sandra", initials: "SA", avatar: "🌸", contractHours: 16}],
@@ -242,12 +243,28 @@
         return new Date(date.setDate(diff)).toISOString().split('T')[0];
     }
 
-    window.doLogin = () => {
-        if(document.getElementById('user-in').value === 'creative' && document.getElementById('pass-in').value === 'uncreative') {
-            localStorage.setItem('rota_v10_auth', 'true');
-            init();
-        } else document.getElementById('l-err').classList.remove('hidden');
-    };
+   window.doLogin = async () => {
+
+    const email = document.getElementById('user-in').value.trim();
+    const password = document.getElementById('pass-in').value;
+
+    try {
+
+        await signInWithEmailAndPassword(auth, email, password);
+
+        localStorage.setItem('rota_v10_auth', 'true');
+
+        init();
+
+    } catch (err) {
+
+        console.error(err);
+
+        document.getElementById('l-err').classList.remove('hidden');
+
+    }
+
+};
 
     function init() {
         if(localStorage.getItem('rota_v10_auth') !== 'true') return;
